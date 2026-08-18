@@ -116,7 +116,7 @@
        tty               ; improve the terminal Emacs experience
 
        :lang
-       ada               ; In strong typing we (blindly) trust
+       ;;ada               ; In strong typing we (blindly) trust
        ;;(agda +local)     ; types of types of types of types...
        ;;beancount         ; mind the GAAP
        (cc +lsp)         ; C > C++ == 1

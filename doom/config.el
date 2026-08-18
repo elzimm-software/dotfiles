@@ -5,7 +5,7 @@
 
 (setq fancy-splash-image "~/.config/doom/banner.png")
 (add-to-list 'custom-theme-load-path "~/.config/doom/themes/")
-(setq doom-theme `doom-ves)
+(setq doom-theme `horizon-trash-panda)
 
 (setq display-line-numbers-type t)
 
