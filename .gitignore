@@ -5,6 +5,7 @@
 /dconf/
 /pulse/
 /jgit/
+/emacs/
 
 # empty placeholder dirs some apps create, nothing to track
 /procps/

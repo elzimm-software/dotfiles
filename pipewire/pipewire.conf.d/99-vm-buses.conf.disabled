@@ -1,0 +1,36 @@
+context.objects = [
+    { factory = adapter
+      args = {
+          factory.name     = support.null-audio-sink
+          node.name        = "Bus-Games"
+          node.description = "Games/Apps Bus"
+          media.class      = "Audio/Sink"
+          audio.position   = [ FL FR ]
+      }
+    }
+    { factory = adapter
+      args = {
+          factory.name     = support.null-audio-sink
+          node.name        = "Bus-Music"
+          node.description = "Music/Media Bus"
+          media.class      = "Audio/Sink"
+          audio.position   = [ FL FR ]
+      }
+    }
+    { factory = adapter
+      args = {
+          factory.name     = support.null-audio-sink
+          node.name        = "Bus-Voice"
+          node.description = "Voice Bus"
+          media.class      = "Audio/Sink"
+          audio.position   = [ FL FR ]
+      }
+    }
+
+    { factory = link-factory args = { link.output.node = "Bus-Games" link.output.port = "monitor_FL" link.input.node = "alsa_output.usb-GuangZhou_FiiO_Electronics_Co._Ltd_FiiO_K7-00.analog-stereo" link.input.port = "playback_FL" } }
+    { factory = link-factory args = { link.output.node = "Bus-Games" link.output.port = "monitor_FR" link.input.node = "alsa_output.usb-GuangZhou_FiiO_Electronics_Co._Ltd_FiiO_K7-00.analog-stereo" link.input.port = "playback_FR" } }
+    { factory = link-factory args = { link.output.node = "Bus-Music" link.output.port = "monitor_FL" link.input.node = "alsa_output.usb-GuangZhou_FiiO_Electronics_Co._Ltd_FiiO_K7-00.analog-stereo" link.input.port = "playback_FL" } }
+    { factory = link-factory args = { link.output.node = "Bus-Music" link.output.port = "monitor_FR" link.input.node = "alsa_output.usb-GuangZhou_FiiO_Electronics_Co._Ltd_FiiO_K7-00.analog-stereo" link.input.port = "playback_FR" } }
+    { factory = link-factory args = { link.output.node = "Bus-Voice" link.output.port = "monitor_FL" link.input.node = "alsa_output.usb-GuangZhou_FiiO_Electronics_Co._Ltd_FiiO_K7-00.analog-stereo" link.input.port = "playback_FL" } }
+    { factory = link-factory args = { link.output.node = "Bus-Voice" link.output.port = "monitor_FR" link.input.node = "alsa_output.usb-GuangZhou_FiiO_Electronics_Co._Ltd_FiiO_K7-00.analog-stereo" link.input.port = "playback_FR" } }
+]

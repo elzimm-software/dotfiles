@@ -47,10 +47,19 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --fork
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
 
-# Volume control
-bindsym XF86AudioRaiseVolume exec --no-startup-id pamixer -i 5
-bindsym XF86AudioLowerVolume exec --no-startup-id pamixer -d 5
-bindsym XF86AudioMute exec --no-startup-id pamixer -t
+# Volume control (voicemeeter-style buses)
+# plain = Music/Media, Ctrl = Games/Apps (default), Shift = Voice (Discord)
+bindsym XF86AudioRaiseVolume exec --no-startup-id pamixer --sink Bus-Music --allow-boost -i 5
+bindsym XF86AudioLowerVolume exec --no-startup-id pamixer --sink Bus-Music --allow-boost -d 5
+bindsym XF86AudioMute exec --no-startup-id pamixer --sink Bus-Music -t
+
+bindsym Control+XF86AudioRaiseVolume exec --no-startup-id pamixer --sink Bus-Games --allow-boost -i 5
+bindsym Control+XF86AudioLowerVolume exec --no-startup-id pamixer --sink Bus-Games --allow-boost -d 5
+bindsym Control+XF86AudioMute exec --no-startup-id pamixer --sink Bus-Games -t
+
+bindsym Shift+XF86AudioRaiseVolume exec --no-startup-id pamixer --sink Bus-Voice --allow-boost -i 5
+bindsym Shift+XF86AudioLowerVolume exec --no-startup-id pamixer --sink Bus-Voice --allow-boost -d 5
+bindsym Shift+XF86AudioMute exec --no-startup-id pamixer --sink Bus-Voice -t
 
 # Media control
 bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
