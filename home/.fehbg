@@ -1,0 +1,2 @@
+#!/bin/sh
+feh --no-fehbg --bg-fill '/home/eli/.config/i3/backgrounds/st-gerstahl.jpg' '/home/eli/.config/i3/backgrounds/st-ephrael.jpg' '/home/eli/.config/i3/backgrounds/st-celestine.jpg' 

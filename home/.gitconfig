@@ -1,0 +1,19 @@
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[user]
+	email = elijahz0409@gmail.com
+	name = Elijah Zimmerman
+	signingkey = 4C400325EB765662
+[init]
+	defaultBranch = master
+[commit]
+	gpgsign = true
+[tag]
+	gpgSign = true
+[push]
+	autoSetupRemote = true
+	default = current
