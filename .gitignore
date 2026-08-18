@@ -1,0 +1,17 @@
+# large app data / binary caches / state, not hand-authored configs
+/mozilla/
+/JetBrains/
+/Mullvad VPN/
+/dconf/
+/pulse/
+/jgit/
+
+# empty placeholder dirs some apps create, nothing to track
+/procps/
+/imsettings/
+/ibus/
+/enchant/
+/abrt/
+
+# regenerated zsh completion cache
+/home/.zcompdump

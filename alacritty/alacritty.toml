@@ -1,0 +1,34 @@
+# Colors (Horizon Dark)
+[colors.primary]
+background = '#1c1e26'
+foreground = '#e0e0e0'
+
+[colors.normal]
+black = '#16161c'
+red = '#e95678'
+green = '#29d398'
+yellow = '#fab795'
+blue = '#26bbd9'
+magenta = '#ee64ac'
+cyan = '#59e1e3'
+white = '#d5d8da'
+
+[colors.bright]
+black = '#5b5858'
+red = '#ec6a88'
+green = '#3fdaa4'
+yellow = '#fbc3a7'
+blue = '#3fc4de'
+magenta = '#f075b5'
+cyan = '#6be4e6'
+white = '#d5d8da'
+
+[window]
+opacity = 0.85
+blur = false
+
+[font]
+normal = { family = "Hack Nerd Font Mono", style = "Regular" }
+bold = { family = "Hack Nerd Font Mono", style = "Bold" }
+italic = { family = "Hack Nerd Font Mono", style = "Italic" }
+size = 11

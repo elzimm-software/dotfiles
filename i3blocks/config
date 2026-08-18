@@ -1,0 +1,34 @@
+separator=true
+color=#e0e0e0
+
+[spotify]
+label= 
+command=~/.config/i3blocks/spotify.sh
+interval=2
+markup=pango
+color=#29d398
+
+[cpu]
+label= CPU:
+command=bash -c 'usage=$(top -bn1 | grep "Cpu(s)" | awk "{print \$2 + \$4}"); if (( $(echo "$usage > 80" | bc -l) )); then echo "<span color=\"#e95678\">$usage%</span>"; else echo "$usage%"; fi'
+interval=5
+markup=pango
+
+[memory]
+label= RAM:
+command=free -h | awk '/Mem:/ {print $3 "/" $2}'
+interval=30
+color=#29d398
+
+[disk]
+label=󰋊 Disk:
+command=df -h / | awk '/\// {print $4}'
+interval=60
+color=#fab795
+
+[time]
+label=󰅐 
+command=date '+%I:%M%P %a %m-%d'
+interval=1
+color=#ee64ac
+
