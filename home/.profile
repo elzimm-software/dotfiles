@@ -29,3 +29,9 @@ fi
 PATH="$HOME/.local/share/pycharm-2026.1.2/bin:$PATH"
 
 PATH="$HOME/Applications:$PATH"
+PATH="$HOME/go/bin:$PATH"
+
+# HiDPI: Qt doesn't read Xft.dpi, so ask it to auto-scale from the
+# monitor's reported DPI (matches Xft.dpi set in ~/.Xresources).
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
+export XCURSOR_SIZE=40

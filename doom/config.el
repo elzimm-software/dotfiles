@@ -3,7 +3,7 @@
 
 (setq projectile-project-search-path `("~/Programs"))
 
-(setq fancy-splash-image "~/.config/doom/banner.png")
+(setq fancy-splash-image "~/.config/doom/st-ephrael-banner.png")
 (add-to-list 'custom-theme-load-path "~/.config/doom/themes/")
 (setq doom-theme `horizon-trash-panda)
 

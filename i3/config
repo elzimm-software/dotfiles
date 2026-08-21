@@ -17,7 +17,7 @@ set $mod Mod4
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango:Hack Nerd Font Mono 11
+font pango:Hack Nerd Font Mono 9
 
 default_border pixel 1
 default_floating_border pixel 1
@@ -32,6 +32,9 @@ exec --no-startup-id systemctl --user start i3-session.target
 exec --no-startup-id gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 exec --no-startup-id gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
 
+# HiDPI: bump the GTK cursor size to match Xcursor.size in ~/.Xresources
+exec --no-startup-id gsettings set org.gnome.desktop.interface cursor-size 40
+
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex-autostart --autostart --environment i3
@@ -41,25 +44,27 @@ exec --no-startup-id dex-autostart --autostart --environment i3
 
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
 # screen before suspend. Use loginctl lock-session to lock your screen.
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --fork
+exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.config/i3/i3lock-blur.sh
+
+# Disable the X screensaver timer so xss-lock never auto-locks on idle.
+# Locking only happens explicitly: lid close/suspend, the power button
+# (see logind.conf.d/10-power-button-lock.conf), or $mod+slash. Idle
+# dimming (without locking) is handled separately by idle-dim.sh.
+exec --no-startup-id xset s off -dpms
+exec --no-startup-id ~/.config/i3/idle-dim.sh
 
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
 
-# Volume control (voicemeeter-style buses)
-# plain = Music/Media, Ctrl = Games/Apps (default), Shift = Voice (Discord)
-bindsym XF86AudioRaiseVolume exec --no-startup-id pamixer --sink Bus-Music --allow-boost -i 5
-bindsym XF86AudioLowerVolume exec --no-startup-id pamixer --sink Bus-Music --allow-boost -d 5
-bindsym XF86AudioMute exec --no-startup-id pamixer --sink Bus-Music -t
+# Volume control (default sink), with an on-screen dunst OSD
+bindsym XF86AudioRaiseVolume exec --no-startup-id ~/.config/i3/volume-osd.sh up
+bindsym XF86AudioLowerVolume exec --no-startup-id ~/.config/i3/volume-osd.sh down
+bindsym XF86AudioMute exec --no-startup-id ~/.config/i3/volume-osd.sh mute
 
-bindsym Control+XF86AudioRaiseVolume exec --no-startup-id pamixer --sink Bus-Games --allow-boost -i 5
-bindsym Control+XF86AudioLowerVolume exec --no-startup-id pamixer --sink Bus-Games --allow-boost -d 5
-bindsym Control+XF86AudioMute exec --no-startup-id pamixer --sink Bus-Games -t
-
-bindsym Shift+XF86AudioRaiseVolume exec --no-startup-id pamixer --sink Bus-Voice --allow-boost -i 5
-bindsym Shift+XF86AudioLowerVolume exec --no-startup-id pamixer --sink Bus-Voice --allow-boost -d 5
-bindsym Shift+XF86AudioMute exec --no-startup-id pamixer --sink Bus-Voice -t
+# Brightness control, with an on-screen dunst OSD
+bindsym XF86MonBrightnessUp exec --no-startup-id ~/.config/i3/brightness-osd.sh up
+bindsym XF86MonBrightnessDown exec --no-startup-id ~/.config/i3/brightness-osd.sh down
 
 # Media control
 bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
@@ -76,6 +81,10 @@ floating_modifier $mod
 # or left-clicking anywhere into the window while holding the floating modifier.
 tiling_drag modifier titlebar
 
+# lxqt-openssh-askpass reports itself as a normal window (not a dialog type),
+# so i3 tiles it by default -- force it to float like a real prompt.
+for_window [class="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
+
 # start a terminal
 bindsym $mod+Return exec --no-startup-id alacritty
 # start a browser
@@ -85,8 +94,6 @@ bindsym $mod+c exec --no-startup-id emacs
 
 # kill focused window
 bindsym $mod+q kill
-
-bindsym $mod+slash exec --no-startup-id systemctl suspend
 
 # start dmenu (a program launcher)
 # bindsym $mod+d exec --no-startup-id dmenu_run
@@ -196,6 +203,8 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+b exec --no-startup-id killall i3blocks && i3-msg restart
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+# lock the screen (asks logind to lock, which xss-lock picks up)
+bindsym $mod+slash exec --no-startup-id loginctl lock-session
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -245,7 +254,7 @@ bindsym $mod+r mode "resize"
 bar {
         status_command i3blocks
         position top
-        font pango:Hack, Symbols Nerd Font Mono 11
+        font pango:Hack, Symbols Nerd Font Mono 9
 
         colors {
                 background #1e181a
@@ -260,15 +269,14 @@ bar {
         }
 }
 
-exec_always --no-startup-id ~/.config/i3/monitors.sh
 exec --no-startup-id systemctl --user import-environment DISPLAY XAUTHORITY
 exec --no-startup-id dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
 exec --no-startup-id /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
 exec --no-startup-id lxpolkit &
-exec --no-startup-id echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 exec --no-startup-id picom -b
 # feh assigns images by monitor enumeration order (primary first, then by
 # output name: DP-2, HDMI-0, HDMI-1) -- NOT physical left-to-right position.
-exec_always --no-startup-id feh --bg-fill ~/.config/i3/backgrounds/st-gerstahl.jpg ~/.config/i3/backgrounds/st-ephrael.jpg ~/.config/i3/backgrounds/st-celestine.jpg
+exec_always --no-startup-id ~/.config/i3/set-wallpaper.sh ~/.config/i3/backgrounds/st-celestine-fit.jpg
 exec --no-startup-id dunst
 exec --no-startup-id flameshot
+exec --no-startup-id touchegg

@@ -1,5 +1,7 @@
-@theme "/usr/share/rofi/themes/Arc-Dark.rasi"
+@theme "horizon-dark.rasi"
 
 configuration {
-    font: "Hack Nerd Font Mono 11";
+    font: "Hack Nerd Font Mono 16";
+    show-icons: true;
+    icon-theme: "Adwaita";
 }

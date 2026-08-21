@@ -18,7 +18,12 @@ markup=pango
 label= RAM:
 command=free -h | awk '/Mem:/ {print $3 "/" $2}'
 interval=30
-color=#29d398
+color=#26bbd9
+
+[battery]
+command=~/.config/i3blocks/battery.sh
+interval=15
+markup=pango
 
 [disk]
 label=󰋊 Disk:

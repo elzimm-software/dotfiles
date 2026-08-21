@@ -6,6 +6,8 @@
 /pulse/
 /jgit/
 /emacs/
+/discord/
+/go/
 
 # empty placeholder dirs some apps create, nothing to track
 /procps/
