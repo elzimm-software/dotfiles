@@ -20,16 +20,16 @@ command=free -h | awk '/Mem:/ {print $3 "/" $2}'
 interval=30
 color=#26bbd9
 
+#[disk]
+#label=󰋊 
+#command=df -h / | awk '/\// {print $4}'
+#interval=60
+#color=#fab795
+
 [battery]
 command=~/.config/i3blocks/battery.sh
 interval=15
 markup=pango
-
-[disk]
-label=󰋊 
-command=df -h / | awk '/\// {print $4}'
-interval=60
-color=#fab795
 
 [time]
 label=󰅐 
