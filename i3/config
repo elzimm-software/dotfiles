@@ -85,6 +85,11 @@ tiling_drag modifier titlebar
 # so i3 tiles it by default -- force it to float like a real prompt.
 for_window [class="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
 
+# nm-applet briefly loses its systray to embed into when i3bar restarts
+# (e.g. from $mod+Shift+b), so it falls back to a normal top-level window
+# that i3 would otherwise tile -- keep it off to the side instead.
+for_window [class="Nm-applet"] floating enable, move scratchpad
+
 # start a terminal
 bindsym $mod+Return exec --no-startup-id alacritty
 # start a browser

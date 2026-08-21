@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=HorizonDark
+Comment=Horizon Dark theme for the LightDM greeter
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=HorizonDark
