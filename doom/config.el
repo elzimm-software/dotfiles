@@ -31,7 +31,15 @@
   (setq ob-mermaid-cli-path (executable-find "mmdc")))
 
 (after! lsp-mode
-  (setq lsp-enable-snippet nil))
+  (setq lsp-enable-snippet nil
+        ;; Always show the code-action menu, even when only one action is
+        ;; available, instead of silently auto-applying it.
+        lsp-auto-execute-action t))
+
+(after! lsp-ui
+  ;; Lightbulb hint in the sideline when a code action is available at
+  ;; point, so you know one exists before invoking SPC c a.
+  (setq lsp-ui-sideline-show-code-actions t))
 
 ;; Match ~/.clang-format (IndentWidth/TabWidth 4, spaces not tabs) so
 ;; indentation and highlight-indent-guides line up with what clang-format
@@ -48,3 +56,10 @@
 (add-hook! '(c-ts-mode-hook c++-ts-mode-hook)
   (setq tab-width 4
         indent-tabs-mode nil))
+
+;; +cc/sync-function-other-file lives in doom/autoload/cc.el (header/source
+;; sync, since clangd's own tweaks only cover header-first inline splitting).
+;; NOTE: bind the full "c y" path directly -- reopening the prefix with
+;; (:prefix ("c" . "code") ...) redefines SPC c's keymap from scratch and
+;; clobbers Doom's existing bindings under it (ca, cf, etc).
+(map! :leader :desc "Sync function to other file" "c y" #'+cc/sync-function-other-file)
