@@ -11,6 +11,10 @@
 
 (setq doom-font (font-spec :family "Hack Nerd Font" :size 13))
 
+(map! "C-=" #'text-scale-increase
+      "C--" #'text-scale-decrease
+      "C-0" #'(lambda () (interactive) (text-scale-set 0)))
+
 ;; Emacs is launched via i3 `exec`, which doesn't source ~/.profile, so
 ;; ~/go/bin (gopls, gore, etc.) never makes it into Emacs's exec-path.
 (let ((go-bin (expand-file-name "~/go/bin")))

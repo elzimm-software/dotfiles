@@ -19,3 +19,7 @@
 
 # regenerated zsh completion cache
 /home/.zcompdump
+
+# ad-hoc backup dirs/files made during migrations
+*.bak
+*.bak-*
