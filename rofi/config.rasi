@@ -1,7 +1,7 @@
 @theme "horizon-dark.rasi"
 
 configuration {
-    font: "Hack Nerd Font Mono 16";
+    font: "Hack Nerd Font Mono 9";
     show-icons: true;
     icon-theme: "Adwaita";
 }

@@ -9,6 +9,8 @@
 
 (setq display-line-numbers-type t)
 
+(setq doom-font (font-spec :family "Hack Nerd Font" :size 13))
+
 ;; Emacs is launched via i3 `exec`, which doesn't source ~/.profile, so
 ;; ~/go/bin (gopls, gore, etc.) never makes it into Emacs's exec-path.
 (let ((go-bin (expand-file-name "~/go/bin")))
