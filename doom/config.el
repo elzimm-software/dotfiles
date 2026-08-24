@@ -32,3 +32,19 @@
 
 (after! lsp-mode
   (setq lsp-enable-snippet nil))
+
+;; Match ~/.clang-format (IndentWidth/TabWidth 4, spaces not tabs) so
+;; indentation and highlight-indent-guides line up with what clang-format
+;; actually writes on save. `cc +tree-sitter` opens files in c-ts-mode /
+;; c++-ts-mode, which ignore c-basic-offset and use their own offset var.
+(add-hook! '(c-mode-hook c++-mode-hook)
+  (setq c-basic-offset 4
+        tab-width 4
+        indent-tabs-mode nil))
+
+(after! c-ts-mode
+  (setq c-ts-mode-indent-offset 4))
+
+(add-hook! '(c-ts-mode-hook c++-ts-mode-hook)
+  (setq tab-width 4
+        indent-tabs-mode nil))
