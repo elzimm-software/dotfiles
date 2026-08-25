@@ -9,7 +9,7 @@
 
 (setq display-line-numbers-type t)
 
-(setq doom-font (font-spec :family "Hack Nerd Font" :size 13))
+(setq doom-font (font-spec :family "Hack Nerd Font" :size 15))
 
 (map! "C-=" #'text-scale-increase
       "C--" #'text-scale-decrease
