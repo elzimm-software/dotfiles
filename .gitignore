@@ -19,3 +19,6 @@
 
 # regenerated zsh completion cache
 /home/.zcompdump
+
+# regenerated desktop-file mimetype cache
+/autostart/mimeinfo.cache
