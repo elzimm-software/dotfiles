@@ -29,3 +29,4 @@ fi
 PATH="$HOME/.local/share/pycharm-2026.1.2/bin:$PATH"
 
 PATH="$HOME/Applications:$PATH"
+PATH="$HOME/go/bin:$PATH"

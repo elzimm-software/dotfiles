@@ -1,15 +1,40 @@
 #!/usr/bin/bash
+# Horizon Dark lock screen. Invoked by xss-lock (see i3/config), which
+# expects this to stay in the foreground and waits on it to release the
+# sleep lock -- hence --nofork + `wait` below rather than i3lock's own fork.
 
 i3lock \
     --nofork \
     --blur 7 \
     --indicator \
-    --keyhl-color="88cc00ff" \
-    --ring-color="333333ff" \
-    --inside-color="00000000" \
     --clock \
-    --timestr="%I:%M%P" \
-    --datestr="%a %m-%d" &
+    --time-str="%I:%M%P" \
+    --date-str="%a %m-%d" \
+    --time-font="Hack Nerd Font Mono" \
+    --date-font="Hack Nerd Font Mono" \
+    --layout-font="Hack Nerd Font Mono" \
+    --verif-font="Hack Nerd Font Mono" \
+    --wrong-font="Hack Nerd Font Mono" \
+    --time-size=32 \
+    --date-size=14 \
+    --color=1e181aff \
+    --ring-color=5b5858bb \
+    --inside-color=1e181abb \
+    --ringver-color=26bbd9ff \
+    --insidever-color=1e181abb \
+    --ringwrong-color=e95678ff \
+    --insidewrong-color=1e181abb \
+    --line-color=00000000 \
+    --separator-color=00000000 \
+    --keyhl-color=29d398ff \
+    --bshl-color=e95678ff \
+    --verif-color=e0e0e0ff \
+    --wrong-color=e95678ff \
+    --modif-color=fab795ff \
+    --layout-color=e0e0e0ff \
+    --time-color=e0e0e0ff \
+    --date-color=5b5858ff \
+    --greeter-color=e0e0e0ff &
 
 LOCK_PID=$!
 
