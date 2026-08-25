@@ -22,3 +22,7 @@
 
 # regenerated desktop-file mimetype cache
 /autostart/mimeinfo.cache
+
+# ad-hoc backup dirs/files made during migrations
+*.bak
+*.bak-*
