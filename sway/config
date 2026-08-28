@@ -56,10 +56,13 @@ exec nm-applet
 # the lock command returns, same as xss-lock's --transfer-sleep-lock did.
 # The 180s timeout only dims (does not lock) -- fullscreen suppression is
 # handled natively by the inhibit_idle rule below, audio suppression by
-# idle-dim.sh itself.
+# idle-dim.sh itself. swaylock is the mvforell fork (ext-session-lock-v1 +
+# clock); it reads ~/.config/swaylock/config (pre-blurred lockbg.jpg as the
+# background). The `pgrep ||` guard stops lock + before-sleep both firing on
+# suspend from stacking two lockers.
 exec swayidle -w \
-    lock 'swaylock --daemonize' \
-    before-sleep 'swaylock --daemonize' \
+    lock 'pgrep -x swaylock || swaylock --daemonize' \
+    before-sleep 'pgrep -x swaylock || swaylock --daemonize' \
     timeout 180 '~/.config/sway/idle-dim.sh' \
     resume 'brightnessctl -r'
 

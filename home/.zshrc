@@ -13,6 +13,11 @@ HISTFILE=~/.zsh_history
 export PATH="$PATH:$HOME/.local/bin:$HOME/go/bin"
 
 # ---------------------------------------------------------------------------
+# Aliases
+# ---------------------------------------------------------------------------
+alias neofetch=fastfetch
+
+# ---------------------------------------------------------------------------
 # Completion system
 # ---------------------------------------------------------------------------
 setopt COMPLETE_IN_WORD   # complete from the cursor, not just end of word

@@ -15,6 +15,7 @@
 (package! org-fragtog
           :recipe (:host github :repo "io12/org-fragtog"))
 (package! ob-mermaid)
+(package! jinx)
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;; (package! some-package)

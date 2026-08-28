@@ -1,1 +1,9 @@
 **/.claude/settings.local.json
+.ruby-lsp/
+.dir-locals.el
+.DS_Store
+*.swp
+.idea/
+.vscode/
+.direnv/
+.envrc
