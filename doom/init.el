@@ -85,7 +85,7 @@
 
        :checkers
        syntax              ; tasing you for every semicolon you forget
-       ;;(spell +flyspell) ; replaced by jinx (see packages.el / config.el)
+       spell               ; private jinx-based override (modules/checkers/spell/)
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
@@ -194,6 +194,10 @@
        ;;everywhere        ; *leave* Emacs!? You must be joking
        irc               ; how neckbeards socialize
        (rss +org)        ; emacs as an RSS reader
+
+       :personal
+       ruby-lsp          ; ruby-lsp + Bundler gem provisioning
+       cc-sync           ; C/C++ header <-> source prototype/stub sync
 
        :config
        ;;literate
