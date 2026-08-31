@@ -20,6 +20,9 @@
 # regenerated zsh completion cache
 /home/.zcompdump
 
+# Zeal rewrites this on every run (window geometry, state)
+/Zeal/Zeal.conf
+
 # ad-hoc backup dirs/files made during migrations
 *.bak
 *.bak-*
