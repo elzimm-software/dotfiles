@@ -58,6 +58,12 @@
   ;; point, so you know one exists before invoking SPC c a.
   (setq lsp-ui-sideline-show-code-actions t))
 
+;; Python LSP via basedpyright instead of stock pyright. The binary is an
+;; isolated venv symlinked into ~/.local/bin, which is already on exec-path
+;; (see the block near the top of this file).
+(after! lsp-pyright
+  (setq lsp-pyright-langserver-command "basedpyright"))
+
 ;; Match ~/.clang-format (IndentWidth/TabWidth 4, spaces not tabs) so
 ;; indentation and highlight-indent-guides line up with what clang-format
 ;; actually writes on save. `cc +tree-sitter` opens files in c-ts-mode /
