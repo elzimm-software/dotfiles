@@ -9,6 +9,14 @@
 #   system/etc/lightdm/lightdm-gtk-greeter.conf -> /etc/lightdm/lightdm-gtk-greeter.conf
 #   system/usr/share/backgrounds/foo.jpg        -> /usr/share/backgrounds/foo.jpg
 #
+# A few files only belong on one machine profile (see i3_only/sway_only
+# below). This reads the `wm` profile chezmoi already asks about (from
+# ~/.config/chezmoi/chezmoi.toml) and skips files tagged for the other
+# profile, so pull/push can't cross-contaminate the two machines - e.g. a
+# blanket `push` on the sway laptop must not install the desktop's
+# i3-monitors.sh or dnf.conf. If `wm` can't be determined, every tagged
+# file is skipped rather than guessed.
+#
 # Usage:
 #   system/sync.sh diff   # show what differs between repo and live files
 #   system/sync.sh pull   # copy live -> repo (snapshot current system state)
@@ -19,7 +27,40 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 cmd="${1:-diff}"
 
+wm=$(sed -n 's/^[[:space:]]*wm[[:space:]]*=[[:space:]]*"\(.*\)"[[:space:]]*$/\1/p' ~/.config/chezmoi/chezmoi.toml 2>/dev/null || true)
+if [[ "$wm" != "i3" && "$wm" != "sway" ]]; then
+	echo "warning: couldn't determine this machine's wm profile from ~/.config/chezmoi/chezmoi.toml; skipping all machine-specific files for safety" >&2
+	wm=""
+fi
+
+i3_only=(
+	"./etc/dnf/dnf.conf"
+	"./etc/lightdm/lightdm.conf.d/10-monitors-setup.conf"
+	"./etc/systemd/logind.conf.d/10-power-button-suspend.conf"
+	"./usr/local/bin/i3-monitors.sh"
+)
+sway_only=(
+	"./etc/lightdm/lightdm-gtk-greeter.conf.d/50-hidpi.conf"
+	"./usr/share/backgrounds/horizon-dark-greeter-laptop.jpg"
+	"./usr/share/fonts/hack-nerd-font/"*.ttf
+)
+
+belongs_to_other_profile() {
+	local f="$1" p
+	if [[ "$wm" != sway ]]; then
+		for p in "${sway_only[@]}"; do [[ "$f" == $p ]] && return 0; done
+	fi
+	if [[ "$wm" != i3 ]]; then
+		for p in "${i3_only[@]}"; do [[ "$f" == $p ]] && return 0; done
+	fi
+	return 1
+}
+
 while IFS= read -r -d '' repo; do
+	if belongs_to_other_profile "$repo"; then
+		[[ "$cmd" == diff ]] && echo "skipping $repo (belongs to the other machine profile)" >&2
+		continue
+	fi
 	live="/${repo#./}"
 	case "$cmd" in
 	diff)
