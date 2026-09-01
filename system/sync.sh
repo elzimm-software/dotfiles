@@ -29,7 +29,7 @@ while IFS= read -r -d '' repo; do
 		cp -v "$live" "$repo"
 		;;
 	push)
-		sudo install -D -m "$(stat -c %a "$live" 2>/dev/null || echo 644)" "$repo" "$live"
+		sudo install -D -m "$(stat -c %a "$live" 2>/dev/null || stat -c %a "$repo")" "$repo" "$live"
 		;;
 	*)
 		echo "usage: $0 {diff|pull|push}" >&2

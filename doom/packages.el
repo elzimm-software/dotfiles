@@ -15,6 +15,11 @@
 (package! org-fragtog
           :recipe (:host github :repo "io12/org-fragtog"))
 (package! ob-mermaid)
+(package! claude-code
+  :recipe (:host github :repo "stevemolitor/claude-code.el"
+           :files ("*.el" (:exclude "images/*"))))
+(package! monet
+  :recipe (:host github :repo "stevemolitor/monet"))
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;; (package! some-package)

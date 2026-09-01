@@ -79,3 +79,36 @@
 (add-hook! '(c-ts-mode-hook c++-ts-mode-hook)
   (setq tab-width 4
         indent-tabs-mode nil))
+
+(use-package! claude-code
+  :config
+  (setq claude-code-terminal-backend 'vterm)
+  (claude-code-mode)
+  ;; Emacs's own process inherits CLAUDECODE/CLAUDE_CODE_CHILD_SESSION from
+  ;; whatever shell launched it, so a `claude` session started here reads
+  ;; itself as a nested child session and disables transcript saving. An
+  ;; entry with no "=" unsets the var for the subprocess regardless of what
+  ;; Emacs inherited, so each session started this way is treated as fresh.
+  (add-hook 'claude-code-process-environment-functions
+            (lambda (_buffer-name _dir)
+              '("CLAUDECODE" "CLAUDE_CODE_CHILD_SESSION"))))
+
+(use-package! monet
+  :after claude-code
+  :init
+  ;; claude-code-command-map already uses several single letters (i, s, m,
+  ;; ...) that monet's own C-c m map would also want, so monet's map is
+  ;; bound as its own leader sibling ("o m") below instead of nesting it
+  ;; inside "o c"; no need for monet's separate global C-c m prefix too.
+  (setq monet-prefix-key nil)
+  :config
+  (monet-mode)
+  ;; Auto-starts a Monet websocket server whenever a Claude Code session
+  ;; launches from claude-code.el, instead of requiring the manual
+  ;; `/ide` slash command each time.
+  (add-hook 'claude-code-process-environment-functions
+            #'monet-start-server-function))
+
+(map! :leader
+      :desc "Claude Code" "o c" claude-code-command-map
+      :desc "Claude IDE (monet)" "o m" monet-command-map)
