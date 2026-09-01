@@ -1,0 +1,157 @@
+setopt histignorealldups sharehistory
+
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
+
+# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+HISTSIZE=1000
+SAVEHIST=1000
+HISTFILE=~/.zsh_history
+
+# ~/.local/bin (pipx, `gem install --bindir`) and ~/go/bin (`go install`) for
+# interactive non-login shells, which never source ~/.zprofile.
+export PATH="$PATH:$HOME/.local/bin:$HOME/go/bin"
+
+# ---------------------------------------------------------------------------
+# Aliases
+# ---------------------------------------------------------------------------
+alias neofetch=fastfetch
+
+# ---------------------------------------------------------------------------
+# Completion system
+# ---------------------------------------------------------------------------
+setopt COMPLETE_IN_WORD   # complete from the cursor, not just end of word
+setopt ALWAYS_TO_END      # jump to end of word after an unambiguous completion
+setopt PATH_DIRS          # complete foo/bar against $PATH entries
+setopt AUTO_PARAM_SLASH   # append / when a completed value is a directory
+setopt EXTENDED_GLOB      # richer globbing (also used by some completions)
+unsetopt MENU_COMPLETE    # show the menu; don't blindly insert the first match
+unsetopt FLOW_CONTROL     # free up ^S / ^Q
+
+# Pick up newly-installed binaries without restarting the shell.
+zstyle ':completion:*' rehash true
+
+# --- first-party completions: let tools generate their own ------------
+# Cache each tool's own `completion zsh` output under ~/.cache/zsh/generated
+# and refresh it when older than a week. This is the source of truth; carapace
+# (below) only fills what has nothing better. Runs before compinit so the
+# generated files land in the dump.
+_zcomp_gen="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/generated"
+[[ -d $_zcomp_gen ]] || mkdir -p $_zcomp_gen
+fpath=(~/.config/zsh/completions $_zcomp_gen $fpath)
+
+_gen_comp() {  # $1 = output file (_docker), $2 = binary, $3… = args to run
+  local file=$1 bin=$2; shift 2
+  (( $+commands[$bin] )) || return
+  local dst=$_zcomp_gen/$file
+  [[ -f $dst && -z $dst(#qN.mw+1) ]] && return          # fresh (<1 week): keep
+  if $bin "$@" >| $dst.tmp 2>/dev/null && [[ -s $dst.tmp ]]; then
+    mv -f $dst.tmp $dst
+  else
+    rm -f $dst.tmp
+  fi
+}
+_gen_comp _docker   docker   completion zsh
+_gen_comp _gh       gh       completion -s zsh
+_gen_comp _rustup   rustup   completions zsh
+_gen_comp _cargo    rustup   completions zsh cargo
+_gen_comp _just     just     --completions zsh
+_gen_comp _poetry   poetry   completions zsh
+_gen_comp _starship starship completions zsh
+unfunction _gen_comp
+
+# Modern completion system, with a cached dump. Do the full (security-checked)
+# compinit at most once a day; otherwise load the dump fast with -C.
+autoload -Uz compinit
+_zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-${ZSH_VERSION}"
+[[ -d ${_zcompdump:h} ]] || mkdir -p ${_zcompdump:h}
+if [[ -n ${_zcompdump}(#qN.mh+24) ]]; then
+  compinit -d "$_zcompdump"
+else
+  compinit -C -d "$_zcompdump"
+fi
+unset _zcompdump _zcomp_gen
+
+# --- completers ---------------------------------------------------------
+# _complete    context-aware completion (git subcommands, ssh hosts, units…)
+# _match       like _complete but lets a trailing * match loosely
+# _extensions  complete *.ext globs
+# _approximate typo-tolerant, and only if everything above found nothing
+# _expand (brace/glob/param expansion on TAB) and _correct (typo-correction
+# of the word you already typed) from the stock config are dropped on purpose.
+zstyle ':completion:*' completer _complete _match _extensions _approximate
+zstyle ':completion:*:match:*' original only
+zstyle ':completion:*:approximate:*' max-errors 'reply=( $(( ($#PREFIX+$#SUFFIX)/3 > 3 ? 3 : ($#PREFIX+$#SUFFIX)/3 )) )'
+
+# --- caching (noticeable speedup for dnf / systemctl / …) --------------
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compcache"
+
+# --- matching: exact, then case-insensitive, then partial-word --------
+zstyle ':completion:*' matcher-list '' \
+  'm:{a-zA-Z}={A-Za-z}' \
+  'r:|[._-]=* r:|=*'
+
+# --- presentation ----------------------------------------------------
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' verbose true
+zstyle ':completion:*' auto-description 'specify: %d'
+zstyle ':completion:*' list-prompt   '%SAt %p: Hit TAB for more, or the character to insert%s'
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+zstyle ':completion:*:descriptions' format '%F{yellow}%B%d%b%f'
+zstyle ':completion:*:messages'     format '%F{blue}%d%f'
+zstyle ':completion:*:warnings'     format '%F{red}no matches for %d%f'
+zstyle ':completion:*:corrections'  format '%F{green}%d (errors: %e)%f'
+eval "$(dircolors -b)"
+zstyle ':completion:*:default'         list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*:*:-command-:*:*' group-order aliases builtins functions commands
+
+# Keep _-prefixed functions/params out of the way unless you type the _.
+zstyle ':completion:*:functions'  ignored-patterns '_*'
+zstyle ':completion:*:parameters' ignored-patterns '_*'
+
+# Complete the command after sudo; offer . and .. in file lists.
+zstyle ':completion:*' special-dirs true
+zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin \
+  /usr/sbin /usr/bin /sbin /bin
+
+# Nicer process lists for kill / killall.
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:*:kill:*' menu yes select
+zstyle ':completion:*:*:kill:*:processes' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+# --- carapace: broad multi-command fallback --------------------------
+# github.com/carapace-sh/carapace-bin — argument completion for ~1300 commands
+# that ship no zsh completion. Inert until `carapace` is on PATH; install with:
+#   curl -fsSL https://github.com/carapace-sh/carapace-bin/releases/latest/download/carapace-bin_linux_amd64.tar.gz \
+#     | tar -xz -C ~/.local/bin carapace
+if (( $+commands[carapace] )); then
+  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense'
+  zstyle ':completion:*:carapace:*' format $'\e[2;37mCompleting %d\e[m'
+  source <(carapace _carapace zsh)
+fi
+
+# --- first-party / cherry-picked completions win over carapace -------
+# carapace registers its own spec for these; re-point them at the real one.
+for _bin _fn ( \
+  docker _docker    gh _gh          rustup _rustup   cargo _cargo \
+  just _just        poetry _poetry  starship _starship  go _golang \
+  cmake _cmake      ctest _ctest    cpack _cpack ) \
+do
+  (( $+commands[$_bin] )) && (( $+functions[$_fn] )) && compdef $_fn $_bin
+done
+unset _bin _fn
+
+# --- last resort: parse `--help` for the few things nothing else covers
+for _c ( errno doom claude delta dust duf sd ); do
+  (( $+commands[$_c] )) && (( ! $+_comps[$_c] )) && compdef _gnu_generic $_c
+done
+unset _c
+
+# Plugins (installed via dnf) - syntax-highlighting must be sourced last
+source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Prompt (config in ~/.config/starship.toml)
+eval "$(starship init zsh)"

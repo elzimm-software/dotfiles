@@ -1,0 +1,13 @@
+{{ if eq .wm "i3" -}}
+export QT_QPA_PLATFORMTHEME=qt6ct
+export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
+
+# GUI passphrase prompt for ssh-add/ssh when no tty is attached (e.g. git
+# invoked from an editor or GUI app). Matches the i3 for_window rule for
+# lxqt-openssh-askpass in i3/config.
+export SSH_ASKPASS=/usr/bin/lxqt-openssh-askpass
+export SSH_ASKPASS_REQUIRE=prefer
+{{ else -}}
+export QT_QPA_PLATFORMTHEME=qt6ct
+export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
+{{ end }}

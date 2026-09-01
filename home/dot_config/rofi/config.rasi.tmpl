@@ -1,0 +1,17 @@
+{{ if eq .wm "i3" -}}
+@theme "horizon-dark.rasi"
+
+configuration {
+    font: "Hack Nerd Font Mono 11";
+    show-icons: true;
+    icon-theme: "Adwaita";
+}
+{{ else -}}
+@theme "horizon-dark.rasi"
+
+configuration {
+    font: "Hack Nerd Font Mono 9";
+    show-icons: true;
+    icon-theme: "Adwaita";
+}
+{{ end }}

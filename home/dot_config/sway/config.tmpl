@@ -1,0 +1,505 @@
+{{ if eq .wm "i3" -}}
+# Default config for sway
+#
+# Copy this to ~/.config/sway/config and edit it to your liking.
+#
+# Read `man 5 sway` for a complete reference.
+
+### Variables
+#
+# Logo key. Use Mod1 for Alt.
+set $mod Mod4
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+# Your preferred terminal emulator
+set $term foot
+# Your preferred application launcher
+# Note: pass the final command to swaymsg so that the resulting window can be opened
+# on the original workspace that the command was run on.
+set $menu dmenu_path | wmenu | xargs swaymsg exec --
+
+include /etc/sway/config-vars.d/*
+
+### Output configuration
+#
+# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+#
+# Example configuration:
+#
+#   output HDMI-A-1 resolution 1920x1080 position 1920,0
+#
+# You can get the names of your outputs by running: swaymsg -t get_outputs
+
+### Idle configuration
+#
+# Example configuration:
+#
+# exec swayidle -w \
+#          timeout 300 'swaylock -f -c 000000' \
+#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+#          before-sleep 'swaylock -f -c 000000'
+#
+# This will lock your screen after 300 seconds of inactivity, then turn off
+# your displays after another 300 seconds, and turn your screens back on when
+# resumed. It will also lock your screen before your computer goes to sleep.
+
+### Input configuration
+#
+# Example configuration:
+#
+#   input "2:14:SynPS/2_Synaptics_TouchPad" {
+#       dwt enabled
+#       tap enabled
+#       natural_scroll enabled
+#       middle_emulation enabled
+#   }
+#
+# You can get the names of your inputs by running: swaymsg -t get_inputs
+# Read `man 5 sway-input` for more information about this section.
+
+### Key bindings
+#
+# Basics:
+#
+    # Start a terminal
+    bindsym $mod+Return exec $term
+
+    # Kill focused window
+    bindsym $mod+Shift+q kill
+
+    # Start your launcher
+    bindsym $mod+d exec $menu
+
+    # Drag floating windows by holding down $mod and left mouse button.
+    # Resize them with right mouse button + $mod.
+    # Despite the name, also works for non-floating windows.
+    # Change normal to inverse to use left mouse button for resizing and right
+    # mouse button for dragging.
+    floating_modifier $mod normal
+
+    # Reload the configuration file
+    bindsym $mod+Shift+c reload
+
+    # Exit sway (logs you out of your Wayland session)
+    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+#
+# Moving around:
+#
+    # Move your focus around
+    bindsym $mod+$left focus left
+    bindsym $mod+$down focus down
+    bindsym $mod+$up focus up
+    bindsym $mod+$right focus right
+    # Or use $mod+[up|down|left|right]
+    bindsym $mod+Left focus left
+    bindsym $mod+Down focus down
+    bindsym $mod+Up focus up
+    bindsym $mod+Right focus right
+
+    # Move the focused window with the same, but add Shift
+    bindsym $mod+Shift+$left move left
+    bindsym $mod+Shift+$down move down
+    bindsym $mod+Shift+$up move up
+    bindsym $mod+Shift+$right move right
+    # Ditto, with arrow keys
+    bindsym $mod+Shift+Left move left
+    bindsym $mod+Shift+Down move down
+    bindsym $mod+Shift+Up move up
+    bindsym $mod+Shift+Right move right
+#
+# Workspaces:
+#
+    # Switch to workspace
+    bindsym $mod+1 workspace number 1
+    bindsym $mod+2 workspace number 2
+    bindsym $mod+3 workspace number 3
+    bindsym $mod+4 workspace number 4
+    bindsym $mod+5 workspace number 5
+    bindsym $mod+6 workspace number 6
+    bindsym $mod+7 workspace number 7
+    bindsym $mod+8 workspace number 8
+    bindsym $mod+9 workspace number 9
+    bindsym $mod+0 workspace number 10
+    # Move focused container to workspace
+    bindsym $mod+Shift+1 move container to workspace number 1
+    bindsym $mod+Shift+2 move container to workspace number 2
+    bindsym $mod+Shift+3 move container to workspace number 3
+    bindsym $mod+Shift+4 move container to workspace number 4
+    bindsym $mod+Shift+5 move container to workspace number 5
+    bindsym $mod+Shift+6 move container to workspace number 6
+    bindsym $mod+Shift+7 move container to workspace number 7
+    bindsym $mod+Shift+8 move container to workspace number 8
+    bindsym $mod+Shift+9 move container to workspace number 9
+    bindsym $mod+Shift+0 move container to workspace number 10
+    # Note: workspaces can have any name you want, not just numbers.
+    # We just use 1-10 as the default.
+#
+# Layout stuff:
+#
+    # You can "split" the current object of your focus with
+    # $mod+b or $mod+v, for horizontal and vertical splits
+    # respectively.
+    bindsym $mod+b splith
+    bindsym $mod+v splitv
+
+    # Switch the current container between different layout styles
+    bindsym $mod+s layout stacking
+    bindsym $mod+w layout tabbed
+    bindsym $mod+e layout toggle split
+
+    # Make the current focus fullscreen
+    bindsym $mod+f fullscreen
+
+    # Toggle the current focus between tiling and floating mode
+    bindsym $mod+Shift+space floating toggle
+
+    # Swap focus between the tiling area and the floating area
+    bindsym $mod+space focus mode_toggle
+
+    # Move focus to the parent container
+    bindsym $mod+a focus parent
+#
+# Scratchpad:
+#
+    # Sway has a "scratchpad", which is a bag of holding for windows.
+    # You can send windows there and get them back later.
+
+    # Move the currently focused window to the scratchpad
+    bindsym $mod+Shift+minus move scratchpad
+
+    # Show the next scratchpad window or hide the focused scratchpad window.
+    # If there are multiple scratchpad windows, this command cycles through them.
+    bindsym $mod+minus scratchpad show
+#
+# Resizing containers:
+#
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+
+    # Ditto, with arrow keys
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    # Return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+#
+# Status Bar:
+#
+# Read `man 5 sway-bar` for more information about this section.
+bar {
+    position top
+
+    # When the status_command prints a new line to stdout, swaybar updates.
+    # The default just shows the current date and time.
+    status_command while date +'%Y-%m-%d %X'; do sleep 1; done
+
+    colors {
+        statusline #ffffff
+        background #323232
+        inactive_workspace #32323200 #32323200 #5c5c5c
+    }
+}
+
+include /etc/sway/config.d/*
+{{ else -}}
+# sway config, ported from ~/.config/i3/config. Keep the two in sync by hand
+# when changing keybindings/exec lines -- there is no shared include between
+# them since sway and i3 config syntax diverges in a few places (app_id vs
+# class, output/bg handling, idle/lock handling).
+
+set $mod Mod4
+
+font pango:Hack Nerd Font Mono 9
+
+default_border pixel 1
+default_floating_border pixel 1
+
+# HiDPI: matches the Xft.dpi: 163 tuning in ~/.Xresources (163/96 ~= 1.7).
+# Adjust live with `swaymsg output eDP-1 scale <value>` to taste.
+output eDP-1 scale 1.7
+
+# /etc/X11/xorg.conf.d/30-touchpad.conf (Tapping + NaturalScrolling) is an
+# Xorg InputClass config -- sway doesn't read it at all, it has its own
+# libinput config below. Without this, tap-to-click reverts to libinput's
+# default (off).
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+}
+
+# feh assigns images by monitor enumeration order (primary first, then by
+# output name: DP-2, HDMI-0, HDMI-1) -- NOT physical left-to-right position.
+output eDP-1 bg ~/.config/i3/backgrounds/st-celestine-fit.jpg fill
+
+# LightDM doesn't register this session with systemd the way GNOME/KDE do,
+# so graphical-session.target (and anything gated on it, e.g. xdg-desktop-portal)
+# never starts on its own. sway-session.target (~/.config/systemd/user/sway-session.target)
+# pulls it in via BindsTo=.
+exec systemctl --user start sway-session.target
+
+# Force system dark mode preference (GTK/Firefox/portal-aware apps read this)
+exec gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+exec gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
+
+# HiDPI: bump the GTK cursor size to match Xcursor.size in ~/.Xresources
+exec gsettings set org.gnome.desktop.interface cursor-size 40
+
+# Start XDG autostart .desktop files using dex. See also
+# https://wiki.archlinux.org/index.php/XDG_Autostart
+exec dex-autostart --autostart --environment sway
+
+# NetworkManager is the most popular way to manage wireless networks on Linux,
+# and nm-applet is a desktop environment-independent system tray GUI for it.
+# sway's bar has a built-in StatusNotifierItem tray, so this just shows up.
+exec nm-applet
+
+# swayidle listens for the same logind Lock/PrepareForSleep signals xss-lock
+# used to under i3 -- lid close/suspend/power button (see
+# logind.conf.d/10-power-button-lock.conf) and `loginctl lock-session`
+# ($mod+slash below) all funnel through here. -w holds the sleep lock until
+# the lock command returns, same as xss-lock's --transfer-sleep-lock did.
+# The 180s timeout only dims (does not lock) -- fullscreen suppression is
+# handled natively by the inhibit_idle rule below, audio suppression by
+# idle-dim.sh itself. swaylock is the mvforell fork (ext-session-lock-v1 +
+# clock); it reads ~/.config/swaylock/config (pre-blurred lockbg.jpg as the
+# background). The `pgrep ||` guard stops lock + before-sleep both firing on
+# suspend from stacking two lockers.
+exec swayidle -w \
+    lock 'pgrep -x swaylock || swaylock --daemonize' \
+    before-sleep 'pgrep -x swaylock || swaylock --daemonize' \
+    timeout 180 '~/.config/sway/idle-dim.sh' \
+    resume 'brightnessctl -r'
+
+# Volume control (default sink), with an on-screen dunst OSD
+bindsym XF86AudioRaiseVolume exec ~/.config/i3/volume-osd.sh up
+bindsym XF86AudioLowerVolume exec ~/.config/i3/volume-osd.sh down
+bindsym XF86AudioMute exec ~/.config/i3/volume-osd.sh mute
+
+# Brightness control, with an on-screen dunst OSD
+bindsym XF86MonBrightnessUp exec ~/.config/i3/brightness-osd.sh up
+bindsym XF86MonBrightnessDown exec ~/.config/i3/brightness-osd.sh down
+
+# Media control
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
+# Launch Flameshot GUI for click-and-drag capture
+bindsym Print exec flameshot gui
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+# move tiling windows via drag & drop by left-clicking into the title bar,
+# or left-clicking anywhere into the window while holding the floating modifier.
+# (sway doesn't have i3's "modifier titlebar" mode -- titlebar dragging is
+# already on by default whenever tiling_drag is enabled.)
+tiling_drag enable
+
+# lxqt-openssh-askpass reports itself as a normal window (not a dialog type),
+# so sway tiles it by default -- force it to float like a real prompt.
+# Kept as class= (XWayland WM_CLASS) with an app_id= twin in case it ever
+# ships a native-Wayland build.
+for_window [class="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
+for_window [app_id="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
+
+# nm-applet briefly loses its systray to embed into when the bar restarts,
+# so it falls back to a normal top-level window that sway would otherwise
+# tile -- keep it off to the side instead.
+for_window [class="Nm-applet"] floating enable, move scratchpad
+for_window [app_id="Nm-applet"] floating enable, move scratchpad
+
+# Don't dim/lock the screen while any window is fullscreen (video,
+# presentations, etc). Native sway replacement for xidlehook's
+# --not-when-fullscreen.
+for_window [app_id=".*"] inhibit_idle fullscreen
+
+# start a terminal
+bindsym $mod+Return exec alacritty
+# start a browser
+bindsym $mod+b exec firefox
+# start emacs
+bindsym $mod+c exec emacs
+
+# kill focused window
+bindsym $mod+q kill
+
+bindsym $mod+space exec rofi -show drun -show-icons
+
+# change focus
+bindsym $mod+j focus left
+bindsym $mod+k focus down
+bindsym $mod+l focus up
+bindsym $mod+semicolon focus right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# move focused window
+bindsym $mod+Shift+j move left
+bindsym $mod+Shift+k move down
+bindsym $mod+Shift+l move up
+bindsym $mod+Shift+semicolon move right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# split in horizontal orientation
+bindsym $mod+h split h
+
+# split in vertical orientation
+bindsym $mod+v split v
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
+# scratchpad
+bindsym $mod+Shift+grave move scratchpad
+bindsym $mod+grave scratchpad show
+
+# change container layout (stacked, tabbed, toggle split)
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# toggle tiling / floating
+bindsym $mod+Shift+d floating toggle
+
+# change focus between tiling / floating windows
+bindsym $mod+d focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# Define names for default workspaces for which we configure key bindings later on.
+# We use variables to avoid repeating the names in multiple places.
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+
+# switch to workspace
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+
+# move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+# sway has no i3-style "restart in place" -- a Wayland compositor can't
+# restart without killing every client's connection (unlike i3, where X11
+# is a separate server that survives a WM restart). reload is the closest
+# equivalent: it re-reads this config and applies keybinding/appearance/bar
+# changes live, but won't respawn already-running exec'd daemons (swayidle,
+# dunst, etc.) -- that needs a full logout/login.
+bindsym $mod+Shift+r reload
+# Force refresh the bar (sway has no restart -- killing i3blocks and
+# re-issuing status_command over IPC respawns it in place)
+bindsym $mod+Shift+b exec killall i3blocks; swaymsg bar bar-0 status_command i3blocks
+# exit sway (logs you out of your Wayland session)
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+# lock the screen (asks logind to lock, which swayidle picks up)
+bindsym $mod+slash exec loginctl lock-session
+
+# resize window (you can also use the mouse for that)
+mode "resize" {
+        bindsym j resize shrink width 1 px or 1 ppt
+        bindsym k resize grow height 1 px or 1 ppt
+        bindsym l resize shrink height 1 px or 1 ppt
+        bindsym semicolon resize grow width 1 px or 1 ppt
+
+        bindsym Left resize shrink width 1 px or 1 ppt
+        bindsym Down resize grow height 1 px or 1 ppt
+        bindsym Up resize shrink height 1 px or 1 ppt
+        bindsym Right resize grow width 1 px or 1 ppt
+
+        bindsym Shift+j resize shrink width 10 px or 10 ppt
+        bindsym Shift+k resize grow height 10 px or 10 ppt
+        bindsym Shift+l resize shrink height 10 px or 10 ppt
+        bindsym Shift+semicolon resize grow width 10 px or 10 ppt
+
+        bindsym Shift+Left resize shrink width 10 px or 10 ppt
+        bindsym Shift+Down resize grow height 10 px or 10 ppt
+        bindsym Shift+Up resize shrink height 10 px or 10 ppt
+        bindsym Shift+Right resize grow width 10 px or 10 ppt
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+        bindsym $mod+r mode "default"
+}
+
+bindsym $mod+r mode "resize"
+
+# Start a bar to display a workspace bar (plus the system information
+# i3blocks finds out). sway's bar has a built-in StatusNotifierItem tray,
+# so nm-applet's icon just shows up -- no tray_output override needed.
+bar {
+        status_command i3blocks
+        position top
+        font pango:Hack, Symbols Nerd Font Mono 9
+
+        colors {
+                background #1e181a
+                statusline #e0e0e0
+                separator  #5b5858
+
+                focused_workspace  #26bbd9 #26bbd9 #1e181a
+                active_workspace   #16161c #16161c #e0e0e0
+                inactive_workspace #1e181a #1e181a #5b5858
+                urgent_workspace   #e95678 #e95678 #1e181a
+                binding_mode       #ee64ac #ee64ac #1e181a
+        }
+}
+
+exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
+exec dunst
+exec flameshot
+exec touchegg
+{{ end }}

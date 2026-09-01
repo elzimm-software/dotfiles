@@ -1,0 +1,7 @@
+{{ if eq .wm "i3" -}}
+#!/bin/sh
+feh --no-fehbg --bg-fill '/home/eli/.config/i3/backgrounds/st-gerstahl.jpg' '/home/eli/.config/i3/backgrounds/st-ephrael.jpg' '/home/eli/.config/i3/backgrounds/st-celestine.jpg' 
+{{ else -}}
+#!/bin/sh
+feh --no-fehbg --bg-fill '/home/eli/.config/i3/backgrounds/st-celestine-fit.jpg' 
+{{ end }}

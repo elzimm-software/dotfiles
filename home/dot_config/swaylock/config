@@ -1,0 +1,44 @@
+# Horizon Dark, ported 1:1 from the old ~/.config/i3/i3lock-blur.sh
+# color values (i3lock and swaylock take the same rrggbb[aa] hex format).
+#
+# Locker is the mvforell/swaylock fork (upstream swaylock 1.8 + clock patch,
+# on ext-session-lock-v1), built from ~/.local/src/swaylock-mvforell and
+# installed to /usr/local/bin.
+#
+# No native blur -- lockbg.jpg is a one-time pre-blurred copy of the
+# wallpaper. Regenerate it whenever the wallpaper changes:
+#   magick ~/.config/i3/backgrounds/st-celestine-fit.jpg -blur 0x10 \
+#       -brightness-contrast -12x0 ~/.config/swaylock/lockbg.jpg
+
+image=/home/eli/.config/swaylock/lockbg.jpg
+scaling=fill
+color=1e181aff
+
+clock
+indicator-idle-visible
+timestr=%I:%M %p
+datestr=%a %b %-d
+
+font=Hack Nerd Font Mono
+indicator-radius=90
+indicator-thickness=7
+
+ring-color=5b5858bb
+inside-color=1e181abb
+ring-ver-color=26bbd9ff
+inside-ver-color=1e181abb
+ring-wrong-color=e95678ff
+inside-wrong-color=1e181abb
+
+line-color=00000000
+separator-color=00000000
+
+key-hl-color=29d398ff
+bs-hl-color=e95678ff
+
+text-color=e0e0e0ff
+text-ver-color=e0e0e0ff
+text-wrong-color=e95678ff
+text-caps-lock-color=fab795ff
+
+layout-text-color=e0e0e0ff

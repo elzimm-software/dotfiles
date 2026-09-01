@@ -1,0 +1,49 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false
+
+# Status line: context on the left, git info right-aligned via $fill.
+# Prompt line: prompt char, clock right-aligned.
+format = """
+$username$hostname $directory$fill$git_branch$git_status
+$character"""
+
+right_format = "$time"
+
+[fill]
+symbol = " "
+
+[username]
+style_user = "bold cyan"
+style_root = "bold red"
+format = "[$user]($style)"
+show_always = true
+
+[hostname]
+ssh_only = false
+format = "[@$hostname]($style) "
+style = "bold cyan"
+
+[directory]
+style = "bold blue"
+truncation_length = 0
+truncate_to_repo = false
+
+[git_branch]
+symbol = ""
+format = "[$symbol$branch]($style)"
+style = "bold yellow"
+
+[git_status]
+format = '[$all_status$ahead_behind]($style)'
+style = "bold red"
+
+[character]
+success_symbol = "[%](bold green) "
+error_symbol = "[%](bold red) "
+
+[time]
+disabled = false
+format = "[$time]($style)"
+style = "bold bright-black"
+time_format = "%-I:%M"

@@ -1,0 +1,4 @@
+{{- $wm := promptString "wm" -}}
+mode = "symlink"
+[data]
+    wm = {{ $wm | quote }}
