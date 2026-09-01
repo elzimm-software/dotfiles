@@ -28,6 +28,7 @@
 /rncbc.org/qpwgraph.conf
 /QtProject.conf
 /touchegg/.touchegg:*.lock
+/kpatrc
 
 # ad-hoc backup dirs/files made during migrations
 *.bak
