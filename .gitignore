@@ -23,6 +23,12 @@
 # regenerated desktop-file mimetype cache
 /autostart/mimeinfo.cache
 
+# app-rewritten UI/runtime state, not hand-authored configs
+/Zeal/Zeal.conf
+/rncbc.org/qpwgraph.conf
+/QtProject.conf
+/touchegg/.touchegg:*.lock
+
 # ad-hoc backup dirs/files made during migrations
 *.bak
 *.bak-*

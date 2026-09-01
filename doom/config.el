@@ -23,12 +23,29 @@
     (add-to-list 'exec-path go-bin)
     (setenv "PATH" (concat go-bin path-separator (getenv "PATH")))))
 
+;; Same story for ~/.local/bin, where `gem install --bindir ~/.local/bin
+;; ruby-lsp' put the ruby-lsp binary. No sourced shell rc under the
+;; graphical session means lsp-mode can't find it otherwise.
+(let ((local-bin (expand-file-name "~/.local/bin")))
+  (when (and (file-directory-p local-bin)
+             (not (member local-bin exec-path)))
+    (add-to-list 'exec-path local-bin)
+    (setenv "PATH" (concat local-bin path-separator (getenv "PATH")))))
+
 (after! org
   (org-babel-do-load-languages
    'org-babel-load-languages
    (append org-babel-load-languages
            '((mermaid . t))))
   (setq ob-mermaid-cli-path (executable-find "mmdc")))
+
+(after! company
+  ;; In prose buffers, drop the dictionary/buffer-word backends
+  ;; (`company-dabbrev', `company-ispell') that pop up completions for whatever
+  ;; word you're mid-typing. `company-capf' stays, so org keyword completion
+  ;; (#+... ) and snippets still work. text-mode is org/markdown's parent, so
+  ;; this covers those too.
+  (set-company-backend! 'text-mode '(:separate company-capf company-yasnippet)))
 
 (after! lsp-mode
   (setq lsp-enable-snippet nil
@@ -40,6 +57,12 @@
   ;; Lightbulb hint in the sideline when a code action is available at
   ;; point, so you know one exists before invoking SPC c a.
   (setq lsp-ui-sideline-show-code-actions t))
+
+;; Python LSP via basedpyright instead of stock pyright. The binary is an
+;; isolated venv symlinked into ~/.local/bin, which is already on exec-path
+;; (see the block near the top of this file).
+(after! lsp-pyright
+  (setq lsp-pyright-langserver-command "basedpyright"))
 
 ;; Match ~/.clang-format (IndentWidth/TabWidth 4, spaces not tabs) so
 ;; indentation and highlight-indent-guides line up with what clang-format
@@ -56,13 +79,6 @@
 (add-hook! '(c-ts-mode-hook c++-ts-mode-hook)
   (setq tab-width 4
         indent-tabs-mode nil))
-
-;; +cc/sync-function-other-file lives in doom/autoload/cc.el (header/source
-;; sync, since clangd's own tweaks only cover header-first inline splitting).
-;; NOTE: bind the full "c y" path directly -- reopening the prefix with
-;; (:prefix ("c" . "code") ...) redefines SPC c's keymap from scratch and
-;; clobbers Doom's existing bindings under it (ca, cf, etc).
-(map! :leader :desc "Sync function to other file" "c y" #'+cc/sync-function-other-file)
 
 (use-package! claude-code
   :config

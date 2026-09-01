@@ -1,4 +1,4 @@
-;;; autoload/cc.el -*- lexical-binding: t; -*-
+;;; personal/cc-sync/autoload.el -*- lexical-binding: t; -*-
 
 ;; Header/source sync for the header-first workflow: write the full
 ;; declaration list in the .h, then generate matching stub definitions in
