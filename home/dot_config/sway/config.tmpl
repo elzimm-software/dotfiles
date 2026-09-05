@@ -76,7 +76,7 @@ bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
 # Launch Flameshot GUI for click-and-drag capture
-bindsym Print exec flameshot gui
+bindsym Print exec ~/.config/sway/screenshot.sh
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -284,7 +284,6 @@ exec_always ~/.config/sway/set-wallpaper.sh DP-2=$HOME/.config/backgrounds/st-ge
 
 exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
 exec dunst
-exec flameshot
 {{ else -}}
 # Laptop sway config. Mirrored (with layout/navigation reinterpreted for
 # scroll's model) in ~/.config/scroll/config.tmpl -- keep exec lines,
@@ -366,7 +365,7 @@ bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
 # Launch Flameshot GUI for click-and-drag capture
-bindsym Print exec flameshot gui
+bindsym Print exec ~/.config/sway/screenshot.sh
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -569,6 +568,5 @@ bar {
 
 exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
 exec dunst
-exec flameshot
 exec touchegg
 {{ end }}

@@ -132,7 +132,6 @@ exec dex-autostart --autostart --environment sway
 exec nm-applet
 exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
 exec dunst
-exec flameshot
 
 {{ if eq .machine "desktop" -}}
 # Per-output wallpaper: DP-2 (primary, mirrored to the greeter) center,
@@ -183,7 +182,7 @@ bindsym $mod+Backspace kill
 bindsym $mod+Shift+Backspace kill unfocused
 bindsym $mod+Ctrl+Backspace kill all
 
-bindsym Print exec flameshot gui
+bindsym Print exec ~/.config/sway/screenshot.sh
 
 # Cheatsheet: small Bubble Tea TUI with hand-curated highlights (source at
 # ~/Projects/scroll-cheatsheet, installed to ~/go/bin) -- not generated from
