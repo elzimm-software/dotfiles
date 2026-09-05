@@ -537,6 +537,11 @@ bindgesture swipe:4:up scale_workspace overview
 bar {
     status_command i3blocks
     position top
+    # Default "dock" mode leaves the bar visible but *under* any window
+    # that overlaps its area -- vertical panning can scroll a column's
+    # content up over the bar's reserved space, covering it. "top" keeps
+    # dock's docked position but always draws over other windows.
+    mode top
 {{ if eq .machine "desktop" -}}
     font pango:Hack, Symbols Nerd Font Mono 11
 {{ else -}}
