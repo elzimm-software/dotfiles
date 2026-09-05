@@ -1,0 +1,502 @@
+# vim: ft=swayconfig
+#
+# scroll config -- derived from ~/.config/sway/config. Intent: keep Eli's
+# application / action keybindings and system plumbing (systemd session,
+# swayidle+swaylock fork, i3blocks bar, flameshot, askpass float rule) exactly
+# as under sway, but hand navigation / layout over to scroll's scrolling model.
+#
+# Where a sway concept has no scroll analog (stacking/tabbed layouts, focus
+# parent), the key is repurposed to the nearest scroll feature, noted inline.
+# Read `man 5 scroll` for the full reference.
+
+set $mod Mod4
+
+# scroll's mode blocks reference these; keep them defined.
+set $left Left
+set $down Down
+set $up Up
+set $right Right
+
+set $term alacritty
+set $menu rofi -show drun -show-icons
+
+font pango:Hack Nerd Font Mono 9
+
+### Appearance -------------------------------------------------------------
+
+default_border pixel 1
+default_floating_border pixel 1
+
+# Small inner gap makes column boundaries legible; sway ran with none, keep
+# outer at 0.
+gaps inner 4
+gaps outer 0
+
+client.focused          #26bbd9 #26bbd9 #1e181a #26bbd9 #26bbd9
+client.focused_inactive #595959 #3b3b3b #e0e0e0 #2e9ef4 #595959
+client.unfocused        #595959 #1b1b1b #e0e0e0 #2e9ef4 #595959
+
+### Output / input ------------------------------------------------------------
+
+# HiDPI: matches Xft.dpi 163 in ~/.Xresources (163/96 ~= 1.7). Adjust live with
+# `scrollmsg output eDP-1 scale <value>`.
+#
+# `force` is required: unlike sway, scroll warns on any fractional scale and
+# will snap 1.7 -> 1.666667 (a value it thinks renders better), throwing the
+# scrollnag error bar on every reload. force pins it to exactly 1.7 -- the same
+# value sway runs. Tradeoff scroll warns about: marginally softer scaling on
+# non-integer factors (XWayland apps already blur at fractional scale anyway).
+output eDP-1 scale 1.7 force
+output eDP-1 bg ~/.config/i3/backgrounds/st-celestine-fit.jpg fill
+
+# /etc/X11/xorg.conf.d/30-touchpad.conf is Xorg-only; scroll has its own
+# libinput config. Without this, tap-to-click reverts to off.
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+}
+
+### scroll layout model -----------------------------------------------------
+
+layout_default_width 0.5
+layout_default_height 1.0
+layout_widths  [0.333333 0.5 0.666667 1.0]
+layout_heights [0.333333 0.5 0.666667 1.0]
+
+maximize_if_single true
+cycle_size_wrap true
+center_horizontal_if_fits true
+center_vertical_if_fits true
+focus_wrapping no
+
+# Touchpad swipe scrolls the layout. This is scroll's native gesture -- it's
+# consumed by the compositor, so Firefox et al. never see it (the "exclusive"
+# you wanted). Default is 3 fingers precisely so it doesn't shadow 2-finger
+# app scrolling; setting it to 2 means ALL two-finger scroll (both axes)
+# becomes layout navigation and pages no longer scroll with two fingers.
+# Change back to 3 if that bites. Negative sensitivity flips the direction.
+gesture_scroll_enable true
+gesture_scroll_fingers 2
+gesture_scroll_sensitivity 1.0
+
+for_window [all] inhibit_idle fullscreen
+
+# scroll's animations are part of the intended feel; defaults.
+animations {
+    enabled yes
+    default yes 300 var 3 [ 0.215 0.61 0.355 1 ]
+    window_open yes 300 var 3 [ 0 0 1 1 ]
+    window_move yes 300 var 3 [ 0.215 0.61 0.355 1 ] off 0.05 6 [0 0.6 0.4 0 1 0 0.4 -0.6 1 -0.6]
+    window_size yes 300 var 3 [ -0.35 0 0 0.5 ]
+    workspace_switch yes 500 var simple [ 0.215 0.61 0.355 1 ]
+    window_fullscreen yes 500 var simple [ 0.3 0.5 0.4 1 ]
+    jump yes 500 var simple [ 0.215 0.61 0.355 1 ]
+    layer_shell yes 300 var 3 [ 0 0 1 1 ]
+    fade_in yes 300 var simple [ 0.32 0 0.67 0 ]
+    fade_out yes 300 var simple [ 0.33 1 0.68 1 ]
+}
+
+### Session plumbing (unchanged from sway) ---------------------------------
+
+# LightDM doesn't register this session with systemd, so graphical-session.target
+# never starts on its own. sway-session.target is just a BindsTo hook onto
+# graphical-session.target -- nothing sway-specific -- so it's reused here.
+# The env import is scroll's /etc/scroll/config.d/50-systemd-user.conf inlined.
+exec systemctl --user set-environment XDG_CURRENT_DESKTOP=scroll
+exec systemctl --user import-environment DISPLAY SCROLLSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+exec hash dbus-update-activation-environment 2>/dev/null && \
+     dbus-update-activation-environment --systemd DISPLAY SCROLLSOCK XDG_CURRENT_DESKTOP=scroll WAYLAND_DISPLAY
+exec systemctl --user start sway-session.target
+
+exec gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+exec gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
+exec gsettings set org.gnome.desktop.interface cursor-size 40
+
+exec dex-autostart --autostart --environment sway
+
+exec nm-applet
+exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
+exec dunst
+exec flameshot
+
+# touchegg dropped: it's an X11-era gesture daemon and does nothing useful under
+# a wlroots compositor (and the user isn't in the input group). scroll's own
+# gesture_scroll + bindgesture cover touchpad gestures natively.
+
+# swayidle -- same logind Lock / PrepareForSleep funnel as under sway. swaylock
+# is the mvforell fork (ext-session-lock-v1 + clock), reads ~/.config/swaylock/config.
+exec swayidle -w \
+    lock 'pgrep -x swaylock || swaylock --daemonize' \
+    before-sleep 'pgrep -x swaylock || swaylock --daemonize' \
+    timeout 180 '~/.config/sway/idle-dim.sh' \
+    resume 'brightnessctl -r'
+
+### Float rules (unchanged from sway) ------------------------------------------
+
+for_window [class="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
+for_window [app_id="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
+for_window [class="Nm-applet"] floating enable, move scratchpad
+for_window [app_id="Nm-applet"] floating enable, move scratchpad
+
+### Applications & actions -- Eli's bindings preserved -----------------------
+
+bindsym $mod+Return exec $term
+bindsym $mod+b exec firefox
+bindsym $mod+c exec emacs
+bindsym $mod+space exec $menu
+
+bindsym $mod+q kill
+bindsym $mod+Backspace kill
+bindsym $mod+Shift+Backspace kill unfocused
+bindsym $mod+Ctrl+Backspace kill all
+
+bindsym Print exec flameshot gui
+
+bindsym --locked XF86AudioRaiseVolume exec ~/.config/i3/volume-osd.sh up
+bindsym --locked XF86AudioLowerVolume exec ~/.config/i3/volume-osd.sh down
+bindsym --locked XF86AudioMute exec ~/.config/i3/volume-osd.sh mute
+bindsym --locked XF86MonBrightnessUp exec ~/.config/i3/brightness-osd.sh up
+bindsym --locked XF86MonBrightnessDown exec ~/.config/i3/brightness-osd.sh down
+bindsym --locked XF86AudioPlay exec playerctl play-pause
+bindsym --locked XF86AudioNext exec playerctl next
+bindsym --locked XF86AudioPrev exec playerctl previous
+
+floating_modifier $mod normal
+tiling_drag enable
+
+bindsym $mod+slash exec loginctl lock-session
+
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec scrollnag -t warning -m 'Exit scroll? This ends your Wayland session.' -B 'Yes, exit' 'scrollmsg exit' -w 500 -e center -y overlay
+bindsym $mod+Shift+x exec scrollmsg exit
+bindsym $mod+Shift+b exec killall i3blocks; scrollmsg bar bar-0 status_command i3blocks
+
+### Navigation -- scroll scrolling model ------------------------------------
+
+bindsym $mod+j focus left
+bindsym $mod+k focus down
+bindsym $mod+l focus up
+bindsym $mod+semicolon focus right
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+bindsym $mod+Home focus beginning
+bindsym $mod+End focus end
+
+bindsym $mod+Shift+j move left
+bindsym $mod+Shift+k move down
+bindsym $mod+Shift+l move up
+bindsym $mod+Shift+semicolon move right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+bindsym $mod+Ctrl+Left move left
+bindsym $mod+Ctrl+Down move down
+bindsym $mod+Ctrl+Up move up
+bindsym $mod+Ctrl+Right move right
+bindsym $mod+Ctrl+Home move beginning
+bindsym $mod+Ctrl+End move end
+
+# Insertion direction. Eli's h/v muscle memory (was split h / split v); brackets
+# are scroll's own defaults, kept as aliases.
+bindsym $mod+h set_mode h
+bindsym $mod+v set_mode v
+bindsym $mod+bracketleft set_mode h
+bindsym $mod+bracketright set_mode v
+bindsym $mod+e layout_transpose
+bindsym $mod+Shift+y layout_transpose
+
+### Workspaces (Eli's semantics: move does not follow) ---------------------
+
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+bindsym $mod+Page_Up workspace prev_on_output
+bindsym $mod+Page_Down workspace next_on_output
+bindsym $mod+Ctrl+z workspace back_and_forth
+
+### Sizing -- scroll ------------------------------------------------------------
+
+bindsym $mod+minus cycle_size h prev
+bindsym $mod+equal cycle_size h next
+bindsym $mod+Shift+minus cycle_size v prev
+bindsym $mod+Shift+equal cycle_size v next
+
+bindsym $mod+t toggle_size this 1.0 1.0
+bindsym $mod+Shift+t toggle_size active 1.0 1.0
+
+bindsym $mod+comma scale_content incr -0.05
+bindsym $mod+period scale_content incr 0.05
+bindsym $mod+Ctrl+period scale_content reset
+bindsym --whole-window $mod+button4 scale_content incr -0.05
+bindsym --whole-window $mod+button5 scale_content incr 0.05
+bindsym $mod+Shift+comma scale_workspace incr -0.05
+bindsym $mod+Shift+period scale_workspace incr 0.05
+bindsym $mod+Shift+Ctrl+period scale_workspace reset
+
+bindsym --no-repeat $mod+Tab scale_workspace overview
+bindsym --no-repeat $mod+Shift+Tab scale_workspaces toggle
+
+### Fullscreen / floating -------------------------------------------------------
+
+bindsym $mod+f fullscreen
+bindsym $mod+Ctrl+f fullscreen layout
+bindsym $mod+Alt+f fullscreen application
+bindsym $mod+Ctrl+Alt+f fullscreen global
+
+bindsym $mod+d focus mode_toggle
+bindsym $mod+y focus mode_toggle
+bindsym $mod+Shift+d floating toggle
+bindsym $mod+Shift+f floating toggle
+
+bindsym --no-repeat $mod+a pin beginning
+bindsym --no-repeat $mod+Shift+a pin end
+bindsym $mod+Shift+Ctrl+a sticky toggle
+
+bindsym --no-repeat $mod+Insert selection toggle
+bindsym --no-repeat $mod+Ctrl+Insert selection reset
+bindsym --no-repeat $mod+Shift+Insert selection move
+
+bindsym $mod+Shift+bracketleft focus_ring prev
+bindsym $mod+Shift+bracketright focus_ring next
+bindsym $mod+Shift+Return focus_ring set
+bindsym $mod+Shift+Delete focus_ring remove
+
+### Scratchpad -- Eli's grave binds + scroll's z binds ---------------------
+
+bindsym $mod+Shift+grave move scratchpad
+bindsym $mod+grave scratchpad show
+bindsym $mod+Shift+z move scratchpad
+bindsym $mod+z scratchpad show
+bindsym --no-repeat $mod+Alt+z scratchpad jump
+
+### Modal bindings -- scroll features --------------------------------------
+
+mode "resize" {
+    bindsym $left resize shrink width 100px
+    bindsym $down resize grow height 100px
+    bindsym $up resize shrink height 100px
+    bindsym $right resize grow width 100px
+    bindsym Shift+$left resize shrink right 100px
+    bindsym Shift+$right resize grow right 100px
+    bindsym Shift+$down resize grow down 100px
+    bindsym Shift+$up resize shrink down 100px
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+mode "floating" {
+    bindsym $left move left 50px
+    bindsym $down move down 50px
+    bindsym $up move up 50px
+    bindsym $right move right 50px
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+r mode "floating"
+
+mode "align" {
+    bindsym c align center; mode default
+    bindsym m align middle; mode default
+    bindsym r align reset; mode default
+    bindsym $left align left; mode default
+    bindsym $right align right; mode default
+    bindsym $up align up; mode default
+    bindsym $down align down; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+s mode "align"
+
+mode "fit_size" {
+    bindsym w fit_size h visible proportional; mode default
+    bindsym Shift+w fit_size v visible proportional; mode default
+    bindsym Ctrl+w fit_size h visible equal; mode default
+    bindsym $right fit_size h toend proportional; mode default
+    bindsym $left fit_size h tobeg proportional; mode default
+    bindsym $down fit_size h all proportional; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+w mode "fit_size"
+
+mode "modifiers" {
+    bindsym $right set_mode after; mode default
+    bindsym $left set_mode before; mode default
+    bindsym home set_mode beginning; mode default
+    bindsym end set_mode end; mode default
+    bindsym $up set_mode focus; mode default
+    bindsym $down set_mode nofocus; mode default
+    bindsym h set_mode center_horiz; mode default
+    bindsym Shift+h set_mode nocenter_horiz; mode default
+    bindsym v set_mode center_vert; mode default
+    bindsym Shift+v set_mode nocenter_vert; mode default
+    bindsym r set_mode reorder_auto; mode default
+    bindsym Shift+r set_mode noreorder_auto; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+backslash mode "modifiers"
+
+mode "wssplit" {
+    bindsym 1 workspace split v 0.25 10; mode default
+    bindsym 2 workspace split v 0.333333 10; mode default
+    bindsym 3 workspace split v 0.5 10; mode default
+    bindsym 4 workspace split v 0.666667 10; mode default
+    bindsym Shift+3 workspace split h 0.5 10; mode default
+    bindsym r workspace split reset; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+Shift+backslash mode "wssplit"
+
+mode "setsizeh" {
+    bindsym 3 set_size h 0.25; mode default
+    bindsym 4 set_size h 0.333333; mode default
+    bindsym 6 set_size h 0.5; mode default
+    bindsym 8 set_size h 0.666667; mode default
+    bindsym 9 set_size h 0.75; mode default
+    bindsym equal set_size h 1.0; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+b mode "setsizeh"
+
+mode "setsizev" {
+    bindsym 3 set_size v 0.25; mode default
+    bindsym 4 set_size v 0.333333; mode default
+    bindsym 6 set_size v 0.5; mode default
+    bindsym 8 set_size v 0.666667; mode default
+    bindsym equal set_size v 1.0; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+Shift+b mode "setsizev"
+
+mode "togglesizeh" {
+    bindsym 4 toggle_size all 0.333333 1.0; mode default
+    bindsym 6 toggle_size all 0.5 1.0; mode default
+    bindsym 8 toggle_size all 0.666667 1.0; mode default
+    bindsym equal toggle_size all 1.0 1.0; mode default
+    bindsym r toggle_size reset; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+t mode "togglesizeh"
+
+mode "togglesizev" {
+    bindsym 4 toggle_size all 1.0 0.333333; mode default
+    bindsym 6 toggle_size all 1.0 0.5; mode default
+    bindsym 8 toggle_size all 1.0 0.666667; mode default
+    bindsym equal toggle_size all 1.0 1.0; mode default
+    bindsym r toggle_size reset; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+Shift+t mode "togglesizev"
+
+mode "jump" {
+    bindsym slash jump tiling; mode default
+    bindsym Shift+slash jump tiling all; mode default
+    bindsym c jump container; mode default
+    bindsym w jump workspaces; mode default
+    bindsym f jump floating; mode default
+    bindsym a jump all; mode default
+    bindsym s scratchpad jump; mode default
+    bindsym r jump criteria [app_id="firefox"]; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+o mode "jump"
+
+mode "filter" {
+    bindsym slash filter active tiling; mode default
+    bindsym Shift+slash filter all tiling; mode default
+    bindsym c filter active container; mode default
+    bindsym f filter active floating; mode default
+    bindsym v filter active visible; mode default
+    bindsym r filter reset; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+Shift+o mode "filter"
+
+mode "trailmark" {
+    bindsym bracketright trailmark next
+    bindsym bracketleft trailmark prev
+    bindsym semicolon trailmark toggle; mode default
+    bindsym --no-repeat slash trailmark jump; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+m mode "trailmark"
+
+mode "trail" {
+    bindsym bracketright trail next
+    bindsym bracketleft trail prev
+    bindsym semicolon trail new; mode default
+    bindsym d trail delete; mode default
+    bindsym c trail clear; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+Shift+m mode "trail"
+
+mode "spaces" {
+    bindsym 1 space load 1; mode default
+    bindsym 2 space load 2; mode default
+    bindsym 3 space load 3; mode default
+    bindsym Shift+1 space save 1; mode default
+    bindsym Shift+2 space save 2; mode default
+    bindsym Shift+3 space save 3; mode default
+    bindsym Escape mode "default"
+}
+bindsym $mod+g mode "spaces"
+
+### Touchpad gestures -- 3+ fingers (2-finger is layout scroll, above) --------
+
+bindgesture swipe:4:right workspace next
+bindgesture swipe:4:left workspace prev
+bindgesture swipe:4:up scale_workspace overview
+
+### Status bar -- Eli's i3blocks + theme, scroll's scroller indicator ------
+
+bar {
+    status_command i3blocks
+    position top
+    font pango:Hack, Symbols Nerd Font Mono 9
+
+    colors {
+        background #1e181a
+        statusline #e0e0e0
+        separator  #5b5858
+
+        focused_workspace  #26bbd9 #26bbd9 #1e181a
+        active_workspace   #16161c #16161c #e0e0e0
+        inactive_workspace #1e181a #1e181a #5b5858
+        urgent_workspace   #e95678 #e95678 #1e181a
+        binding_mode       #ee64ac #ee64ac #1e181a
+
+        scroller #26bbd9ff #1e181aff #e0e0e0ff
+    }
+}

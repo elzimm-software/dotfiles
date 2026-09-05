@@ -12,6 +12,8 @@
 .config/i3/idle-dim.sh
 .config/i3/volume-osd.sh
 .config/i3blocks/battery.sh
+.config/scroll
+.config/scroll/config
 .config/sway/idle-dim.sh
 .config/sway/set-wallpaper.sh
 .config/swaylock

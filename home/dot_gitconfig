@@ -17,3 +17,5 @@
 [push]
 	autoSetupRemote = true
 	default = current
+[core]
+	editor = vim
