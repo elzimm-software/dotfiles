@@ -58,17 +58,17 @@ exec swayidle -w \
 
 # Volume control (voicemeeter-style buses)
 # plain = Music/Media, Ctrl = Games/Apps, Shift = Voice (Discord)
-bindsym XF86AudioRaiseVolume exec pamixer --sink Bus-Music --allow-boost -i 5
-bindsym XF86AudioLowerVolume exec pamixer --sink Bus-Music --allow-boost -d 5
-bindsym XF86AudioMute exec pamixer --sink Bus-Music -t
+bindsym XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up Bus-Music Music
+bindsym XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down Bus-Music Music
+bindsym XF86AudioMute exec ~/.config/sway/volume-osd.sh mute Bus-Music Music
 
-bindsym Control+XF86AudioRaiseVolume exec pamixer --sink Bus-Games --allow-boost -i 5
-bindsym Control+XF86AudioLowerVolume exec pamixer --sink Bus-Games --allow-boost -d 5
-bindsym Control+XF86AudioMute exec pamixer --sink Bus-Games -t
+bindsym Control+XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up Bus-Games Games
+bindsym Control+XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down Bus-Games Games
+bindsym Control+XF86AudioMute exec ~/.config/sway/volume-osd.sh mute Bus-Games Games
 
-bindsym Shift+XF86AudioRaiseVolume exec pamixer --sink Bus-Voice --allow-boost -i 5
-bindsym Shift+XF86AudioLowerVolume exec pamixer --sink Bus-Voice --allow-boost -d 5
-bindsym Shift+XF86AudioMute exec pamixer --sink Bus-Voice -t
+bindsym Shift+XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up Bus-Voice Voice
+bindsym Shift+XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down Bus-Voice Voice
+bindsym Shift+XF86AudioMute exec ~/.config/sway/volume-osd.sh mute Bus-Voice Voice
 
 # Media control
 bindsym XF86AudioPlay exec playerctl play-pause
@@ -92,6 +92,12 @@ tiling_drag enable
 # tile -- keep it off to the side instead.
 for_window [class="Nm-applet"] floating enable, move scratchpad
 for_window [app_id="Nm-applet"] floating enable, move scratchpad
+
+# GPG pinentry dialogs -- relying on sway's floating heuristics for these
+# was flaky (floated inconsistently); force it explicitly. Native Wayland
+# reports app_id=org.gnupg.pinentry-qt; class= covers an XWayland fallback.
+for_window [app_id="org.gnupg.pinentry-qt"] floating enable, move position center
+for_window [class="pinentry-qt"] floating enable, move position center
 
 # Don't dim/lock the screen while any window is fullscreen (video,
 # presentations, etc). Native sway replacement for xidlehook's
@@ -370,6 +376,12 @@ tiling_drag enable
 # tile -- keep it off to the side instead.
 for_window [class="Nm-applet"] floating enable, move scratchpad
 for_window [app_id="Nm-applet"] floating enable, move scratchpad
+
+# GPG pinentry dialogs -- relying on sway's floating heuristics for these
+# was flaky (floated inconsistently); force it explicitly. Native Wayland
+# reports app_id=org.gnupg.pinentry-qt; class= covers an XWayland fallback.
+for_window [app_id="org.gnupg.pinentry-qt"] floating enable, move position center
+for_window [class="pinentry-qt"] floating enable, move position center
 
 # Don't dim/lock the screen while any window is fullscreen (video,
 # presentations, etc). Native sway replacement for xidlehook's

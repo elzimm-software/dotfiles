@@ -157,6 +157,12 @@ exec swayidle -w \
 
 for_window [class="Nm-applet"] floating enable, move scratchpad
 for_window [app_id="Nm-applet"] floating enable, move scratchpad
+
+# GPG pinentry dialogs -- relying on floating heuristics for these was
+# flaky (floated inconsistently); force it explicitly. Native Wayland
+# reports app_id=org.gnupg.pinentry-qt; class= covers an XWayland fallback.
+for_window [app_id="org.gnupg.pinentry-qt"] floating enable, move position center
+for_window [class="pinentry-qt"] floating enable, move position center
 for_window [app_id="scroll-cheatsheet"] floating enable, resize set 1000 800, move position center
 
 ### Applications & actions -- Eli's bindings preserved -----------------------
@@ -182,15 +188,15 @@ bindsym $mod+Shift+slash exec alacritty -o window.opacity=1 --class scroll-cheat
 {{ if eq .machine "desktop" -}}
 # Volume control (voicemeeter-style buses)
 # plain = Music/Media, Ctrl = Games/Apps, Shift = Voice (Discord)
-bindsym --locked XF86AudioRaiseVolume exec pamixer --sink Bus-Music --allow-boost -i 5
-bindsym --locked XF86AudioLowerVolume exec pamixer --sink Bus-Music --allow-boost -d 5
-bindsym --locked XF86AudioMute exec pamixer --sink Bus-Music -t
-bindsym --locked Control+XF86AudioRaiseVolume exec pamixer --sink Bus-Games --allow-boost -i 5
-bindsym --locked Control+XF86AudioLowerVolume exec pamixer --sink Bus-Games --allow-boost -d 5
-bindsym --locked Control+XF86AudioMute exec pamixer --sink Bus-Games -t
-bindsym --locked Shift+XF86AudioRaiseVolume exec pamixer --sink Bus-Voice --allow-boost -i 5
-bindsym --locked Shift+XF86AudioLowerVolume exec pamixer --sink Bus-Voice --allow-boost -d 5
-bindsym --locked Shift+XF86AudioMute exec pamixer --sink Bus-Voice -t
+bindsym --locked XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up Bus-Music Music
+bindsym --locked XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down Bus-Music Music
+bindsym --locked XF86AudioMute exec ~/.config/sway/volume-osd.sh mute Bus-Music Music
+bindsym --locked Control+XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up Bus-Games Games
+bindsym --locked Control+XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down Bus-Games Games
+bindsym --locked Control+XF86AudioMute exec ~/.config/sway/volume-osd.sh mute Bus-Games Games
+bindsym --locked Shift+XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up Bus-Voice Voice
+bindsym --locked Shift+XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down Bus-Voice Voice
+bindsym --locked Shift+XF86AudioMute exec ~/.config/sway/volume-osd.sh mute Bus-Voice Voice
 {{ else -}}
 bindsym --locked XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up
 bindsym --locked XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down
