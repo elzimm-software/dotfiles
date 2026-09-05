@@ -44,13 +44,16 @@ client.unfocused        #595959 #1b1b1b #e0e0e0 #2e9ef4 #595959
 ### Output / input ------------------------------------------------------------
 
 {{ if eq .machine "desktop" -}}
-# Monitor layout: HDMI-1 (vertical monitor, left) - DP-2 (primary, center) -
-# HDMI-0 (TV, right). Mirrors the xrandr layout the LightDM greeter uses
-# (system/usr/local/bin/desktop-monitors.sh) so scroll's own layout matches
-# what's on screen before login.
+# Monitor layout: HDMI-A-2 (Acer KA272, vertical, left) - DP-2 (primary,
+# center) - HDMI-A-1 (Vizio TV, right). Mirrors the xrandr layout the
+# LightDM greeter uses (system/usr/local/bin/desktop-monitors.sh) so
+# scroll's own layout matches what's on screen before login -- note
+# wlroots names HDMI outputs differently than xrandr did (HDMI-A-1/
+# HDMI-A-2 here vs HDMI-0/HDMI-1 there); confirmed by EDID (make/model),
+# not by name.
 output DP-2 mode 1920x1080@240Hz position 1080,0
-output HDMI-1 mode 1920x1080@75Hz position 0,-840 transform 270
-output HDMI-0 mode 1920x1080@59.94Hz position 3000,0
+output HDMI-A-2 mode 1920x1080@75Hz position 0,-840 transform 270
+output HDMI-A-1 mode 1920x1080@59.94Hz position 3000,0
 {{ else -}}
 # HiDPI: matches the 1.7 output scale used in ~/.config/sway/config.tmpl.
 #
@@ -135,9 +138,9 @@ exec flameshot
 
 {{ if eq .machine "desktop" -}}
 # Per-output wallpaper: DP-2 (primary, mirrored to the greeter) center,
-# HDMI-0 right, HDMI-1 left. Same script sway uses, extended for
-# per-output assignment.
-exec_always ~/.config/sway/set-wallpaper.sh DP-2=$HOME/.config/backgrounds/st-gerstahl.jpg HDMI-0=$HOME/.config/backgrounds/st-ephrael.jpg HDMI-1=$HOME/.config/backgrounds/st-celestine.jpg
+# HDMI-A-1 (TV) right, HDMI-A-2 (Acer KA272) left. Same script sway uses,
+# extended for per-output assignment.
+exec_always ~/.config/sway/set-wallpaper.sh DP-2=$HOME/.config/backgrounds/st-gerstahl.jpg HDMI-A-1=$HOME/.config/backgrounds/st-ephrael.jpg HDMI-A-2=$HOME/.config/backgrounds/st-celestine.jpg
 
 {{ end -}}
 # touchegg dropped: it's an X11-era gesture daemon and does nothing useful under

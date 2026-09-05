@@ -11,13 +11,15 @@ font pango:Hack Nerd Font Mono 11
 default_border pixel 1
 default_floating_border pixel 1
 
-# Monitor layout: HDMI-1 (vertical monitor, left) - DP-2 (primary, center) -
-# HDMI-0 (TV, right). Mirrors the xrandr layout the LightDM greeter uses
-# (system/usr/local/bin/desktop-monitors.sh) so sway's own layout matches
-# what's on screen before login.
+# Monitor layout: HDMI-A-2 (Acer KA272, vertical, left) - DP-2 (primary,
+# center) - HDMI-A-1 (Vizio TV, right). Mirrors the xrandr layout the
+# LightDM greeter uses (system/usr/local/bin/desktop-monitors.sh) so sway's
+# own layout matches what's on screen before login -- note wlroots names
+# HDMI outputs differently than xrandr did (HDMI-A-1/HDMI-A-2 here vs
+# HDMI-0/HDMI-1 there); confirmed by EDID (make/model), not by name.
 output DP-2 mode 1920x1080@240Hz position 1080,0
-output HDMI-1 mode 1920x1080@75Hz position 0,-840 transform 270
-output HDMI-0 mode 1920x1080@59.94Hz position 3000,0
+output HDMI-A-2 mode 1920x1080@75Hz position 0,-840 transform 270
+output HDMI-A-1 mode 1920x1080@59.94Hz position 3000,0
 
 # LightDM doesn't register this session with systemd the way GNOME/KDE do,
 # so graphical-session.target (and anything gated on it, e.g. xdg-desktop-portal)
@@ -259,9 +261,9 @@ bar {
 }
 
 # Per-output wallpaper: DP-2 (primary, mirrored to the greeter) center,
-# HDMI-0 right, HDMI-1 left. Unlike the old i3/feh setup, sway places these
-# natively per output -- no compositing hack needed.
-exec_always ~/.config/sway/set-wallpaper.sh DP-2=$HOME/.config/backgrounds/st-gerstahl.jpg HDMI-0=$HOME/.config/backgrounds/st-ephrael.jpg HDMI-1=$HOME/.config/backgrounds/st-celestine.jpg
+# HDMI-A-1 (TV) right, HDMI-A-2 (Acer KA272) left. Unlike the old i3/feh
+# setup, sway places these natively per output -- no compositing hack needed.
+exec_always ~/.config/sway/set-wallpaper.sh DP-2=$HOME/.config/backgrounds/st-gerstahl.jpg HDMI-A-1=$HOME/.config/backgrounds/st-ephrael.jpg HDMI-A-2=$HOME/.config/backgrounds/st-celestine.jpg
 
 exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
 exec dunst
