@@ -56,14 +56,19 @@ exec swayidle -w \
     timeout 180 '~/.config/sway/idle-dim.sh' \
     resume 'brightnessctl -r'
 
-# Volume control (default sink), with an on-screen dunst OSD
-bindsym XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up
-bindsym XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down
-bindsym XF86AudioMute exec ~/.config/sway/volume-osd.sh mute
+# Volume control (voicemeeter-style buses)
+# plain = Music/Media, Ctrl = Games/Apps, Shift = Voice (Discord)
+bindsym XF86AudioRaiseVolume exec pamixer --sink Bus-Music --allow-boost -i 5
+bindsym XF86AudioLowerVolume exec pamixer --sink Bus-Music --allow-boost -d 5
+bindsym XF86AudioMute exec pamixer --sink Bus-Music -t
 
-# Brightness control, with an on-screen dunst OSD
-bindsym XF86MonBrightnessUp exec ~/.config/sway/brightness-osd.sh up
-bindsym XF86MonBrightnessDown exec ~/.config/sway/brightness-osd.sh down
+bindsym Control+XF86AudioRaiseVolume exec pamixer --sink Bus-Games --allow-boost -i 5
+bindsym Control+XF86AudioLowerVolume exec pamixer --sink Bus-Games --allow-boost -d 5
+bindsym Control+XF86AudioMute exec pamixer --sink Bus-Games -t
+
+bindsym Shift+XF86AudioRaiseVolume exec pamixer --sink Bus-Voice --allow-boost -i 5
+bindsym Shift+XF86AudioLowerVolume exec pamixer --sink Bus-Voice --allow-boost -d 5
+bindsym Shift+XF86AudioMute exec pamixer --sink Bus-Voice -t
 
 # Media control
 bindsym XF86AudioPlay exec playerctl play-pause
