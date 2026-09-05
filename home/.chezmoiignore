@@ -1,28 +1,14 @@
-{{- if ne .wm "i3" }}
-.screenlayout
-.screenlayout/docked.sh
-{{- end }}
-{{- if ne .wm "sway" }}
-.Xresources
-.config/environment.d/30-sway-wayland.conf
-.config/i3/backgrounds/st-celestine-fit.jpg
-.config/i3/backgrounds/st-ephrael-fit.jpg
-.config/i3/backgrounds/st-gerstahl-fit.jpg
-.config/i3/brightness-osd.sh
-.config/i3/idle-dim.sh
-.config/i3/volume-osd.sh
+{{- if ne .machine "laptop" }}
 .config/i3blocks/battery.sh
-.config/scroll
-.config/scroll/config
-.config/sway/idle-dim.sh
-.config/sway/set-wallpaper.sh
-.config/swaylock
-.config/swaylock/config
-.config/swaylock/lockbg.jpg
-.config/systemd/user/sway-session.target
 .config/touchegg
 .config/touchegg/touchegg.conf
-.config/wireplumber
 .config/wireplumber/wireplumber.conf.d/51-disable-bluetooth.conf
-.config/xdg-desktop-portal/sway-portals.conf
+.config/backgrounds/st-celestine-fit.jpg
+.config/backgrounds/st-ephrael-fit.jpg
+.config/backgrounds/st-gerstahl-fit.jpg
+{{- end }}
+{{- if ne .machine "desktop" }}
+.config/backgrounds/st-celestine.jpg
+.config/backgrounds/st-ephrael.jpg
+.config/backgrounds/st-gerstahl.jpg
 {{- end }}

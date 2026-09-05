@@ -1,9 +1,0 @@
-! HiDPI tuning for the laptop panel: 1920x1200 @ 302x189mm, approx 161ppi.
-Xft.dpi:       163
-Xft.antialias: true
-Xft.hinting:   true
-Xft.hintstyle: hintslight
-Xft.rgba:      rgb
-Xft.lcdfilter: lcddefault
-
-Xcursor.size:  40

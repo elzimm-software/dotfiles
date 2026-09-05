@@ -1,9 +1,10 @@
 # vim: ft=swayconfig
 #
-# scroll config -- derived from ~/.config/sway/config. Intent: keep Eli's
-# application / action keybindings and system plumbing (systemd session,
-# swayidle+swaylock fork, i3blocks bar, flameshot, askpass float rule) exactly
-# as under sway, but hand navigation / layout over to scroll's scrolling model.
+# scroll config -- derived from ~/.config/sway/config.tmpl. Intent: keep
+# Eli's application / action keybindings and system plumbing (systemd
+# session, swayidle+swaylock fork, i3blocks bar, flameshot, output layout)
+# exactly as under sway, but hand navigation / layout over to scroll's
+# scrolling model.
 #
 # Where a sway concept has no scroll analog (stacking/tabbed layouts, focus
 # parent), the key is repurposed to the nearest scroll feature, noted inline.
@@ -20,7 +21,11 @@ set $right Right
 set $term alacritty
 set $menu rofi -show drun -show-icons
 
+{{ if eq .machine "desktop" -}}
+font pango:Hack Nerd Font Mono 11
+{{ else -}}
 font pango:Hack Nerd Font Mono 9
+{{ end -}}
 
 ### Appearance -------------------------------------------------------------
 
@@ -38,8 +43,16 @@ client.unfocused        #595959 #1b1b1b #e0e0e0 #2e9ef4 #595959
 
 ### Output / input ------------------------------------------------------------
 
-# HiDPI: matches Xft.dpi 163 in ~/.Xresources (163/96 ~= 1.7). Adjust live with
-# `scrollmsg output eDP-1 scale <value>`.
+{{ if eq .machine "desktop" -}}
+# Monitor layout: HDMI-1 (vertical monitor, left) - DP-2 (primary, center) -
+# HDMI-0 (TV, right). Mirrors the xrandr layout the LightDM greeter uses
+# (system/usr/local/bin/desktop-monitors.sh) so scroll's own layout matches
+# what's on screen before login.
+output DP-2 mode 1920x1080@240Hz position 1080,0
+output HDMI-1 mode 1920x1080@75Hz position 0,-840 transform 270
+output HDMI-0 mode 1920x1080@59.94Hz position 3000,0
+{{ else -}}
+# HiDPI: matches the 1.7 output scale used in ~/.config/sway/config.tmpl.
 #
 # `force` is required: unlike sway, scroll warns on any fractional scale and
 # will snap 1.7 -> 1.666667 (a value it thinks renders better), throwing the
@@ -47,7 +60,7 @@ client.unfocused        #595959 #1b1b1b #e0e0e0 #2e9ef4 #595959
 # value sway runs. Tradeoff scroll warns about: marginally softer scaling on
 # non-integer factors (XWayland apps already blur at fractional scale anyway).
 output eDP-1 scale 1.7 force
-output eDP-1 bg ~/.config/i3/backgrounds/st-celestine-fit.jpg fill
+output eDP-1 bg ~/.config/backgrounds/st-celestine-fit.jpg fill
 
 # /etc/X11/xorg.conf.d/30-touchpad.conf is Xorg-only; scroll has its own
 # libinput config. Without this, tap-to-click reverts to off.
@@ -55,7 +68,7 @@ input type:touchpad {
     tap enabled
     natural_scroll enabled
 }
-
+{{ end }}
 ### scroll layout model -----------------------------------------------------
 
 layout_default_width 0.5
@@ -75,6 +88,7 @@ focus_wrapping no
 # app scrolling; setting it to 2 means ALL two-finger scroll (both axes)
 # becomes layout navigation and pages no longer scroll with two fingers.
 # Change back to 3 if that bites. Negative sensitivity flips the direction.
+# (No effect on the desktop, which has no touchpad.)
 gesture_scroll_enable true
 gesture_scroll_fingers 2
 gesture_scroll_sensitivity 1.0
@@ -119,6 +133,13 @@ exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
 exec dunst
 exec flameshot
 
+{{ if eq .machine "desktop" -}}
+# Per-output wallpaper: DP-2 (primary, mirrored to the greeter) center,
+# HDMI-0 right, HDMI-1 left. Same script sway uses, extended for
+# per-output assignment.
+exec_always ~/.config/sway/set-wallpaper.sh DP-2=$HOME/.config/backgrounds/st-gerstahl.jpg HDMI-0=$HOME/.config/backgrounds/st-ephrael.jpg HDMI-1=$HOME/.config/backgrounds/st-celestine.jpg
+
+{{ end -}}
 # touchegg dropped: it's an X11-era gesture daemon and does nothing useful under
 # a wlroots compositor (and the user isn't in the input group). scroll's own
 # gesture_scroll + bindgesture cover touchpad gestures natively.
@@ -131,10 +152,8 @@ exec swayidle -w \
     timeout 180 '~/.config/sway/idle-dim.sh' \
     resume 'brightnessctl -r'
 
-### Float rules (unchanged from sway) ------------------------------------------
+### Float rules --------------------------------------------------------------
 
-for_window [class="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
-for_window [app_id="lxqt-openssh-askpass"] floating enable, resize set 420 130, move position center
 for_window [class="Nm-applet"] floating enable, move scratchpad
 for_window [app_id="Nm-applet"] floating enable, move scratchpad
 
@@ -152,11 +171,11 @@ bindsym $mod+Ctrl+Backspace kill all
 
 bindsym Print exec flameshot gui
 
-bindsym --locked XF86AudioRaiseVolume exec ~/.config/i3/volume-osd.sh up
-bindsym --locked XF86AudioLowerVolume exec ~/.config/i3/volume-osd.sh down
-bindsym --locked XF86AudioMute exec ~/.config/i3/volume-osd.sh mute
-bindsym --locked XF86MonBrightnessUp exec ~/.config/i3/brightness-osd.sh up
-bindsym --locked XF86MonBrightnessDown exec ~/.config/i3/brightness-osd.sh down
+bindsym --locked XF86AudioRaiseVolume exec ~/.config/sway/volume-osd.sh up
+bindsym --locked XF86AudioLowerVolume exec ~/.config/sway/volume-osd.sh down
+bindsym --locked XF86AudioMute exec ~/.config/sway/volume-osd.sh mute
+bindsym --locked XF86MonBrightnessUp exec ~/.config/sway/brightness-osd.sh up
+bindsym --locked XF86MonBrightnessDown exec ~/.config/sway/brightness-osd.sh down
 bindsym --locked XF86AudioPlay exec playerctl play-pause
 bindsym --locked XF86AudioNext exec playerctl next
 bindsym --locked XF86AudioPrev exec playerctl previous
@@ -474,6 +493,7 @@ mode "spaces" {
 bindsym $mod+g mode "spaces"
 
 ### Touchpad gestures -- 3+ fingers (2-finger is layout scroll, above) --------
+### (No effect on the desktop, which has no touchpad.)
 
 bindgesture swipe:4:right workspace next
 bindgesture swipe:4:left workspace prev
@@ -484,7 +504,11 @@ bindgesture swipe:4:up scale_workspace overview
 bar {
     status_command i3blocks
     position top
+{{ if eq .machine "desktop" -}}
+    font pango:Hack, Symbols Nerd Font Mono 11
+{{ else -}}
     font pango:Hack, Symbols Nerd Font Mono 9
+{{ end -}}
 
     colors {
         background #1e181a

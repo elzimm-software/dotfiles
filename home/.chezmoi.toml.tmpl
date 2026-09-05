@@ -1,4 +1,4 @@
-{{- $wm := promptString "wm" -}}
+{{- $machine := promptString "machine" -}}
 mode = "symlink"
 [data]
-    wm = {{ $wm | quote }}
+    machine = {{ $machine | quote }}

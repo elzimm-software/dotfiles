@@ -1,6 +1,6 @@
 /************************************************
  * Horizon Dark theme for rofi, matching the rest
- * of this i3 setup (i3/i3blocks/i3lock/dunst).
+ * of this setup (sway/scroll/i3blocks/swaylock/dunst).
  ***********************************************/
 
 * {
