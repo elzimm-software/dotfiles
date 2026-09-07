@@ -52,6 +52,18 @@ client.unfocused        #595959 #1b1b1b #e0e0e0 #2e9ef4 #595959
 output DP-2 mode 1920x1080@240Hz position 1080,0
 output HDMI-A-2 mode 1920x1080@75Hz position 0,-840 transform 270
 output HDMI-A-1 mode 1920x1080@59.94Hz position 3000,0
+
+# HDMI-A-2 is physically portrait, so new workspaces there scroll top-to-bottom
+# instead of scroll's default left-to-right. DP-2 / HDMI-A-1 keep the global
+# horizontal default. Existing workspaces adopt this on recreation (or $mod+e).
+output HDMI-A-2 layout_type vertical
+
+# In a vertical layout, layout_default_width sizes each *window* (not a column),
+# so the global 0.5 opens new windows at half width. Full width is wanted here;
+# the global still governs column width on the horizontal outputs. Height is the
+# scroll axis here, so 0.5 opens each new window at half the output height.
+output HDMI-A-2 layout_default_width 1.0
+output HDMI-A-2 layout_default_height 0.5
 {{ else -}}
 # HiDPI: matches the 1.7 output scale used in ~/.config/sway/config.tmpl.
 #
@@ -304,10 +316,17 @@ bindsym $mod+Ctrl+z workspace back_and_forth
 
 ### Sizing -- scroll ------------------------------------------------------------
 
-bindsym $mod+minus cycle_size h prev
-bindsym $mod+equal cycle_size h next
-bindsym $mod+Shift+minus cycle_size v prev
-bindsym $mod+Shift+equal cycle_size v next
+# cycle_size takes an absolute axis (h/v), not one relative to the layout, so a
+# fixed `cycle_size h` resizes width even on a vertical (portrait) workspace
+# where the scroll axis is vertical. cycle_size_rel.lua picks the axis from the
+# focused workspace's layout_type: `along` resizes down the scroll axis, `across`
+# resizes the other way. On a horizontal workspace it resolves to the old h/v,
+# so it's a no-op there (and on the single-monitor laptop) -- hence unconditional.
+set $scripts ~/.config/scroll/scripts
+bindsym $mod+minus       lua $scripts/cycle_size_rel.lua along  prev
+bindsym $mod+equal       lua $scripts/cycle_size_rel.lua along  next
+bindsym $mod+Shift+minus lua $scripts/cycle_size_rel.lua across prev
+bindsym $mod+Shift+equal lua $scripts/cycle_size_rel.lua across next
 
 bindsym $mod+t toggle_size this 1.0 1.0
 bindsym $mod+Shift+t toggle_size active 1.0 1.0
