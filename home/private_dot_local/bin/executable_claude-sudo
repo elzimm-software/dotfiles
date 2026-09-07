@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# claude-sudo — run a command under sudo with a GUI password prompt that shows
+# the exact command and a short justification. For agent/headless shells
+# (Claude Code, scripts) that have no controlling TTY.
+#
+#   claude-sudo -r "why this is needed" -- pacman -Syu
+#   claude-sudo systemctl restart foo          # no justification
+#
+# For the custom prompt text to actually render under PAM, add once:
+#   echo 'Defaults passprompt_override' | sudo tee /etc/sudoers.d/passprompt_override
+#
+# No caching: every invocation invalidates the sudo timestamp first, so a
+# password is required each time. This shell has no tty, so the record cleared
+# is sudo's tty-less ("global") one — the user's per-terminal sudo caching is
+# a separate record and is left untouched.
+set -euo pipefail
+
+: "${SUDO_ASKPASS:=/usr/libexec/openssh/lxqt-openssh-askpass}"
+export SUDO_ASKPASS
+
+reason=""
+if [[ ${1:-} == -r || ${1:-} == --reason ]]; then
+  reason=${2:?missing text after -r}
+  shift 2
+  [[ ${1:-} == -- ]] && shift
+fi
+
+[[ $# -gt 0 ]] || {
+  echo "usage: claude-sudo [-r <reason>] [--] <command> [args...]" >&2
+  exit 2
+}
+
+prompt="Claude Code — sudo request
+
+  command:  $*
+"
+[[ -n $reason ]] && prompt+="  reason:   $reason
+"
+prompt+="
+password for %p @ %H: "
+
+sudo -k 2>/dev/null || true
+exec sudo -A -p "$prompt" "$@"
