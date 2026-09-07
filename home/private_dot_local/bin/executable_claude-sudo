@@ -6,8 +6,10 @@
 #   claude-sudo -r "why this is needed" -- pacman -Syu
 #   claude-sudo systemctl restart foo          # no justification
 #
-# For the custom prompt text to actually render under PAM, add once:
-#   echo 'Defaults passprompt_override' | sudo tee /etc/sudoers.d/passprompt_override
+# For the custom prompt text to actually render under PAM, install the sudoers
+# drop-in once per machine (see passprompt_override.example at the repo root):
+#   sudo cp passprompt_override.example /etc/sudoers.d/passprompt_override
+#   sudo chmod 440 /etc/sudoers.d/passprompt_override
 #
 # No caching: every invocation invalidates the sudo timestamp first, so a
 # password is required each time. This shell has no tty, so the record cleared

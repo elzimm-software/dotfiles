@@ -1,0 +1,15 @@
+# Enables claude-sudo's descriptive password prompt.
+#
+# Without this, PAM supplies its own bare "Password:" prompt and sudo's -p text
+# (the command + justification that claude-sudo builds) is never shown. With it,
+# sudo's -p prompt wins.
+#
+# Install on each machine:
+#   sudo cp passprompt_override.example /etc/sudoers.d/passprompt_override
+#   sudo chmod 440 /etc/sudoers.d/passprompt_override
+#   sudo visudo -cf /etc/sudoers.d/passprompt_override   # verify
+#
+# The target name must have no dot in it - sudo ignores files in
+# /etc/sudoers.d/ whose names contain "." - so it is NOT named *.example there.
+
+Defaults passprompt_override
