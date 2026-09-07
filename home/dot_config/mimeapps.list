@@ -2,3 +2,10 @@
 [Default Applications]
 x-scheme-handler/jetbrains=jetbrainsd.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
+inode/directory=thunar.desktop
+x-directory/normal=thunar.desktop
+application/x-gnome-saved-search=thunar.desktop
+
+[Added Associations]
+inode/directory=thunar.desktop;
+x-directory/normal=thunar.desktop;
