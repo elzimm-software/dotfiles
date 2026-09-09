@@ -1,0 +1,21 @@
+# Extends the sudo credential cache (timestamp) to 10 minutes.
+#
+# By default sudo re-prompts for a password after 5 minutes of inactivity.
+# This drop-in raises timestamp_timeout to 10 so a burst of sudo commands in
+# a terminal only prompts once.
+#
+# This does NOT affect claude-sudo: it clears the cached timestamp on every
+# invocation and always prompts fresh. Only plain interactive sudo benefits.
+#
+# Install once per machine, from the chezmoi source dir
+# (`chezmoi source-path`, where this file lives):
+#   sudo cp timestamp_timeout.example /etc/sudoers.d/99-timestamp-timeout
+#   sudo chmod 440 /etc/sudoers.d/99-timestamp-timeout
+#   sudo visudo -cf /etc/sudoers.d/99-timestamp-timeout   # verify syntax
+#
+# The installed name must have no dot in it - sudo ignores files in
+# /etc/sudoers.d/ whose names contain "." - so it is NOT named *.example
+# there. The "99-" prefix makes it sort last so this value wins over any
+# timestamp_timeout set by an earlier drop-in or the main sudoers file.
+
+Defaults timestamp_timeout=10
