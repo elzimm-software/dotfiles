@@ -2,5 +2,8 @@
 
 # Let `sudo -A` (and ssh) reach the GUI askpass from non-interactive shells
 # (Claude Code, scripts, cron). .zshenv is sourced by every zsh, interactive or not.
-export SUDO_ASKPASS=/usr/libexec/openssh/lxqt-openssh-askpass
+# Points at the local lxqt-nonssh-askpass fork (~/Projects/lxqt-nonssh-askpass,
+# installed to /usr/local) — same UI as lxqt-openssh-askpass minus the SSH-only
+# wording, so the claude-sudo prompt doesn't read as an SSH passphrase request.
+export SUDO_ASKPASS=/usr/local/bin/lxqt-openssh-askpass
 [ -n "$SSH_ASKPASS" ] || export SSH_ASKPASS="$SUDO_ASKPASS"

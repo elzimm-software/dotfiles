@@ -17,7 +17,7 @@
 # a separate record and is left untouched.
 set -euo pipefail
 
-: "${SUDO_ASKPASS:=/usr/libexec/openssh/lxqt-openssh-askpass}"
+: "${SUDO_ASKPASS:=/usr/local/bin/lxqt-openssh-askpass}"  # lxqt-nonssh-askpass fork
 export SUDO_ASKPASS
 
 reason=""
