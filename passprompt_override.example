@@ -14,5 +14,19 @@
 #
 # The installed name must have no dot in it - sudo ignores files in
 # /etc/sudoers.d/ whose names contain "." - so it is NOT named *.example there.
+#
+# The askpass GUI itself is a fork of lxqt-openssh-askpass with the SSH-only
+# wording stripped, so the claude-sudo prompt doesn't read as an SSH passphrase
+# request. Clone and build it once per machine:
+#   git clone git@github.com:elzimm-software/lxqt-nonssh-askpass.git ~/Projects/lxqt-nonssh-askpass
+#   cd ~/Projects/lxqt-nonssh-askpass
+#   cmake -B build -S . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
+#   cmake --build build -j"$(nproc)"
+#   sudo cmake --install build          # -> /usr/local/bin/lxqt-openssh-askpass
+# Build deps (Fedora): cmake gcc-c++ liblxqt-devel libqtxdg-devel
+#   qt6-qtbase-devel qt6-linguist qt6-qttools-devel kf6-kwindowsystem-devel
+#   lxqt-build-tools
+# .zshenv points SUDO_ASKPASS (and SSH_ASKPASS) at that /usr/local binary; the
+# rpm-owned /usr/libexec/openssh/lxqt-openssh-askpass is left untouched.
 
 Defaults passprompt_override
