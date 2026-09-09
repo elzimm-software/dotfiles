@@ -82,6 +82,15 @@ input type:touchpad {
     natural_scroll enabled
 }
 {{ end }}
+# Compose key on Right Alt. This used to live in the system X11 keymap
+# (localectl set-x11-keymap ... compose:ralt); systemd-localed silently
+# dropped it when 00-keyboard.conf was regenerated during the i3->sway/scroll
+# migration. Pin it here (and in ~/.config/sway/config.tmpl) where it's tracked
+# -- applies to Wayland natives and XWayland alike.
+input type:keyboard {
+    xkb_options compose:ralt
+}
+
 ### scroll layout model -----------------------------------------------------
 
 layout_default_width 0.5

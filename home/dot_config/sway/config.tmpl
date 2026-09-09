@@ -315,6 +315,15 @@ input type:touchpad {
     natural_scroll enabled
 }
 
+# Compose key on Right Alt. This used to live in the system X11 keymap
+# (localectl set-x11-keymap ... compose:ralt), which systemd-localed
+# silently dropped when 00-keyboard.conf was regenerated during the
+# i3->sway migration. sway has its own xkb handling, so pin it here where
+# it's tracked -- applies to Wayland natives and XWayland alike.
+input type:keyboard {
+    xkb_options compose:ralt
+}
+
 # LightDM doesn't register this session with systemd the way GNOME/KDE do,
 # so graphical-session.target (and anything gated on it, e.g. xdg-desktop-portal)
 # never starts on its own. sway-session.target (~/.config/systemd/user/sway-session.target)
