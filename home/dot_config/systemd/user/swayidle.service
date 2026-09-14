@@ -1,0 +1,22 @@
+# vim: ft=systemd
+#
+# Idle/lock for niri -- same logind Lock/PrepareForSleep funnel as under
+# scroll/sway (~/.config/scroll/config.tmpl), just moved from an `exec` line
+# in the compositor config into its own systemd unit, following
+# /usr/share/doc/niri/wiki/Example-systemd-Setup.md. swaylock is the
+# mvforell fork (ext-session-lock-v1 + clock, /usr/local/bin/swaylock),
+# which niri supports the same as scroll/sway. Added to niri.service via
+# `systemctl --user add-wants niri.service swayidle.service`.
+
+[Unit]
+PartOf=graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/swayidle -w \
+    lock 'pgrep -x swaylock || swaylock --daemonize' \
+    before-sleep 'pgrep -x swaylock || swaylock --daemonize' \
+    timeout 180 '%h/.config/sway/idle-dim.sh' \
+    resume 'brightnessctl -r'
+Restart=on-failure

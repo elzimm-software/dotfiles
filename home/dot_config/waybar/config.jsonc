@@ -1,0 +1,62 @@
+// waybar config for niri -- data modeled on ~/.config/i3blocks/config.tmpl
+// (the scroll/sway bar's status_command). Machine-agnostic like
+// ~/.config/niri/config.kdl: "battery" and "disk" are both listed; whichever
+// doesn't apply to the current machine's hardware just shows nothing.
+{
+    "layer": "top",
+    "position": "top",
+    "height": 20,
+
+    "modules-left": ["niri/workspaces"],
+    "modules-center": [],
+    "modules-right": ["custom/spotify", "cpu", "memory", "disk", "battery", "clock"],
+
+    "niri/workspaces": {
+        "format": "{index}"
+    },
+
+    "custom/spotify": {
+        "exec": "~/.config/i3blocks/spotify.sh",
+        "interval": 2,
+        "return-type": "",
+        "format": " {}"
+    },
+
+    "cpu": {
+        "interval": 5,
+        "format": " {usage}%",
+        "states": {
+            "critical": 80
+        }
+    },
+
+    "memory": {
+        "interval": 30,
+        "format": "󰢮 {used:0.1f}G/{total:0.1f}G"
+    },
+
+    "disk": {
+        "interval": 60,
+        "path": "/",
+        "format": "󰋊 {free}"
+    },
+
+    "battery": {
+        "interval": 15,
+        "states": {
+            "low": 15,
+            "medium": 40
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-icons": ["󰁺", "󰁽", "󰁹"]
+    },
+
+    "clock": {
+        "interval": 1,
+        // waybar's clock uses fmt/chrono specifiers, not GNU date -- no
+        // lowercase am/pm (%P) like the old i3blocks `date` command had,
+        // so %p (uppercase) is the closest match.
+        "format": "󰅐 {:%I:%M %p %a %m-%d}"
+    }
+}

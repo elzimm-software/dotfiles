@@ -1,0 +1,300 @@
+// niri config -- trying niri while scroll matures. Intent: stay close to
+// niri's own default-config.kdl (ships at /usr/share/doc/niri/default-config.kdl)
+// rather than forcing scroll/sway habits over -- niri's own idioms for
+// navigation, sizing, workspaces etc. are left untouched (see the wiki at
+// /usr/share/doc/niri/wiki/ for the full reference). Only hardware basics
+// (outputs, compose key, touchpad), session plumbing (lock/idle, wallpaper,
+// tray, keyring), and 5 explicitly-requested app binds are customized below.
+//
+// Sections intentionally omitted (layout {}, animations {}, cursor {}, etc.)
+// fall back to niri's built-in defaults -- niri only requires binds {} to be
+// written out in full (see Configuration:-Key-Bindings.md).
+//
+// Machine-agnostic on purpose: output/touchpad blocks below are matched by
+// name and are simply inert on a machine where that output/device doesn't
+// exist, so one file covers both the laptop and desktop without templating
+// (unlike ~/.config/scroll/config.tmpl and ~/.config/sway/config.tmpl, which
+// need `{{ if eq .machine ... }}` because sway/scroll require `force` and
+// warn on settings that don't apply).
+
+input {
+    keyboard {
+        xkb {
+            // Compose key on Right Alt -- same reasoning as
+            // ~/.config/scroll/config.tmpl and ~/.config/sway/config.tmpl:
+            // systemd-localed doesn't carry this in the X11 keymap, so it's
+            // pinned per-compositor instead.
+            options "compose:ralt"
+        }
+    }
+
+    // /etc/X11/xorg.conf.d/30-touchpad.conf is Xorg-only; niri has its own
+    // libinput config, same as scroll's. No-op on the desktop (no touchpad).
+    touchpad {
+        tap
+        natural-scroll
+    }
+}
+
+// Laptop: HiDPI panel. Unlike scroll, niri doesn't warn or need `force` for
+// a non-integer scale.
+output "eDP-1" {
+    scale 1.7
+}
+
+// Desktop: HDMI-A-2 (Acer KA272, vertical, left) - DP-2 (primary, center) -
+// HDMI-A-1 (Vizio TV, right). wlroots names HDMI outputs differently than
+// xrandr did (confirmed by EDID, not by name). Inert on the laptop, since
+// none of these outputs exist there.
+output "DP-2" {
+    mode "1920x1080@240"
+    position x=1080 y=0
+}
+output "HDMI-A-2" {
+    mode "1920x1080@75"
+    position x=0 y=-840
+    transform "270"
+}
+output "HDMI-A-1" {
+    mode "1920x1080@59.940"
+    position x=3000 y=0
+}
+
+// Ask apps to omit client-side decorations (title bars) -- niri draws its
+// own focus-ring/border instead. Apps that insist on CSD still get it.
+// Already-running apps need a restart to actually drop their title bar.
+prefer-no-csd
+
+// Matches scroll/sway: near-zero gaps, default_border pixel 1. `border`
+// stays off (its niri default) -- turning it on too would draw a second,
+// separate outline on top of focus-ring. gaps isn't quite 0: at 0 the
+// focus-ring has no room to draw outward at the screen edges and gets
+// clipped there (seen missing on the bottom/left edges).
+// Horizon Dark colors -- the actual values from ~/.config/sway/config's bar
+// colors{} block (also i3blocks, swaylock), not niri's own defaults or
+// scroll's separate client.* additions (sway itself has no custom client.*
+// window-border colors, only the bar). #26bbd9 is this palette's one
+// consistently-used accent, so it's what stands in for "focused" throughout.
+layout {
+    gaps 2
+
+    focus-ring {
+        width 1
+        active-color "#26bbd9"
+        inactive-color "#5b5858"
+    }
+}
+
+overview {
+    backdrop-color "#1e181a"
+}
+
+spawn-at-startup "waybar"
+
+spawn-at-startup "gsettings" "set" "org.gnome.desktop.interface" "color-scheme" "prefer-dark"
+spawn-at-startup "gsettings" "set" "org.gnome.desktop.interface" "gtk-theme" "Adwaita"
+spawn-at-startup "gsettings" "set" "org.gnome.desktop.interface" "cursor-size" "40"
+
+spawn-at-startup "nm-applet"
+spawn-at-startup "gnome-keyring-daemon" "--start" "--components=pkcs11,secrets,ssh"
+
+// dunst (notification daemon), swaybg (wallpaper) and swayidle (idle/lock)
+// run as systemd user services instead -- see
+// ~/.config/systemd/user/swaybg.service and swayidle.service, and
+// /usr/share/doc/niri/wiki/Example-systemd-Setup.md. They're added to
+// niri.service via `systemctl --user add-wants`, not started from here.
+//
+// dex-autostart isn't needed either: niri.service already
+// Wants=xdg-desktop-autostart.target, so XDG autostart entries run natively.
+
+window-rule {
+    match app-id="Nm-applet"
+    open-floating true
+}
+
+// GPG pinentry and SSH_ASKPASS dialogs -- force floating, same as under
+// scroll/sway (relying on floating heuristics was flaky there too).
+window-rule {
+    match app-id=r#"^org\.gnupg\.pinentry-qt$"#
+    open-floating true
+}
+window-rule {
+    match app-id=r#"^lxqt-openssh-askpass$"#
+    open-floating true
+}
+
+// Firefox picture-in-picture -- from niri's own default config.
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+binds {
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // --- Customized on top of niri's stock default-config.kdl; everything
+    // else below this point is untouched. Mod+D (fuzzel) and Mod+T
+    // (alacritty) dropped as redundant with Mod+Space/Mod+Return below.
+    // Add Mod+C (emacs) back later if it's missed -- Mod+C currently still
+    // means center-column (niri default), further down. ---
+    Mod+Return hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
+    Mod+Space hotkey-overlay-title="Run an Application: rofi" { spawn "rofi" "-show" "drun" "-show-icons"; }
+    Mod+B hotkey-overlay-title="Open the Browser: firefox" { spawn "firefox"; }
+
+    Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+
+    Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
+
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
+    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+
+    XF86AudioPlay        allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+    XF86AudioStop        allow-when-locked=true { spawn-sh "playerctl stop"; }
+    XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
+    XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
+
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+
+    Mod+Tab repeat=false { toggle-overview; }
+
+    Mod+Q repeat=false { close-window; }
+
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+
+    // Move vs. focus-monitor swapped from niri's defaults: Shift+arrow moves
+    // the window/column (sway's convention), Ctrl+arrow focuses a monitor.
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Down  { move-window-down; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+J     { move-window-down; }
+    Mod+Shift+K     { move-window-up; }
+    Mod+Shift+L     { move-column-right; }
+
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    Mod+Ctrl+Left  { focus-monitor-left; }
+    Mod+Ctrl+Down  { focus-monitor-down; }
+    Mod+Ctrl+Up    { focus-monitor-up; }
+    Mod+Ctrl+Right { focus-monitor-right; }
+    Mod+Ctrl+H     { focus-monitor-left; }
+    Mod+Ctrl+J     { focus-monitor-down; }
+    Mod+Ctrl+K     { focus-monitor-up; }
+    Mod+Ctrl+L     { focus-monitor-right; }
+
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
+
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+Page_Up        { focus-workspace-up; }
+    Mod+U              { focus-workspace-down; }
+    Mod+I              { focus-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+    Mod+Ctrl+U         { move-column-to-workspace-down; }
+    Mod+Ctrl+I         { move-column-to-workspace-up; }
+
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
+
+    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+
+    Mod+WheelScrollRight      { focus-column-right; }
+    Mod+WheelScrollLeft       { focus-column-left; }
+    Mod+Ctrl+WheelScrollRight { move-column-right; }
+    Mod+Ctrl+WheelScrollLeft  { move-column-left; }
+
+    Mod+Shift+WheelScrollDown      { focus-column-right; }
+    Mod+Shift+WheelScrollUp        { focus-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-column-width-back; }
+
+    Mod+Ctrl+Shift+R { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+
+    Mod+M { maximize-window-to-edges; }
+
+    Mod+Ctrl+F { expand-column-to-available-width; }
+
+    Mod+C { center-column; }
+
+    Mod+Ctrl+C { center-visible-columns; }
+
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    Mod+V       { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+
+    Mod+W { toggle-column-tabbed-display; }
+
+    Print { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+
+    Mod+Shift+E { quit; }
+    Ctrl+Alt+Delete { quit; }
+
+    Mod+Shift+P { power-off-monitors; }
+}

@@ -1,0 +1,96 @@
+/* Horizon Dark -- values taken from ~/.config/sway/config's bar colors{}
+   block (also i3blocks, swaylock), not waybar's own default theme. */
+
+* {
+    /* "Hack" alone isn't installed (only the Nerd Font-patched variants) --
+       it was silently resolving to Noto Sans, dropping both the monospace
+       look and every icon glyph. "Hack Nerd Font Mono" is the real font:
+       Hack's glyphs merged with the Nerd Font icon set, fixed-width. */
+    font-family: "Hack Nerd Font Mono", "Symbols Nerd Font Mono";
+    font-size: 12px;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: #1e181a;
+    color: #e0e0e0;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    color: #5b5858;
+    background-color: transparent;
+    border-radius: 0; /* GTK/Adwaita rounds buttons by default */
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+    color: #1e181a;
+    background-color: #26bbd9;
+}
+
+#workspaces button.urgent {
+    color: #1e181a;
+    background-color: #e95678;
+}
+
+/* sway/scroll only ever show workspaces that exist; niri's dynamic model
+   always keeps one empty trailing workspace per output to scroll into.
+   GTK CSS has no `display: none`, so collapse it to zero size instead. */
+#workspaces button.empty {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    font-size: 0;
+    opacity: 0;
+}
+
+/* i3blocks/swaybar drew a #5b5858 separator between status blocks; waybar
+   has no built-in equivalent, so approximate it with a left border on each
+   right-side module. */
+#custom-spotify,
+#cpu,
+#memory,
+#disk,
+#battery,
+#clock {
+    padding: 0 8px;
+    border-left: 1px solid #5b5858;
+    border-radius: 0; /* GTK/Adwaita rounds these by default */
+}
+
+#custom-spotify {
+    color: #29d398;
+}
+
+#cpu {
+    color: #e0e0e0;
+}
+#cpu.critical {
+    color: #e95678;
+}
+
+#memory {
+    color: #26bbd9;
+}
+
+#disk {
+    color: #fab795;
+}
+
+#battery {
+    color: #29d398;
+}
+#battery.medium {
+    color: #fab795;
+}
+#battery.low {
+    color: #e95678;
+}
+#battery.charging {
+    color: #29d398;
+}
+
+#clock {
+    color: #ee64ac;
+}

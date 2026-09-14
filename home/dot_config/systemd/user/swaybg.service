@@ -1,0 +1,25 @@
+# vim: ft=systemd
+#
+# Wallpaper for niri, following
+# /usr/share/doc/niri/wiki/Example-systemd-Setup.md. Added to niri.service
+# via `systemctl --user add-wants niri.service swaybg.service`.
+#
+# Machine-agnostic: swaybg only creates a background surface for an -o name
+# once the compositor actually advertises that output, so listing every
+# machine's outputs in one line is harmless -- the laptop's eDP-1 entry is a
+# no-op on the desktop and vice versa.
+#
+# Unlike scroll/sway's ~/.config/sway/set-wallpaper.sh, this does NOT sync
+# the primary image into AccountsService's BackgroundFile for the LightDM
+# greeter -- that used `swaymsg`, which is sway/scroll-only IPC. If the
+# greeter background needs to match again, that gdbus call from
+# set-wallpaper.sh can be split into its own compositor-agnostic script.
+
+[Unit]
+PartOf=graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/swaybg -o eDP-1 -i %h/.config/backgrounds/st-celestine-fit.jpg -m fill -o DP-2 -i %h/.config/backgrounds/st-gerstahl.jpg -m fill -o HDMI-A-1 -i %h/.config/backgrounds/st-ephrael.jpg -m fill -o HDMI-A-2 -i %h/.config/backgrounds/st-celestine.jpg -m fill
+Restart=on-failure
