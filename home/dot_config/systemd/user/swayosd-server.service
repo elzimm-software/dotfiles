@@ -1,0 +1,20 @@
+# vim: ft=systemd
+#
+# Volume/brightness OSD popup for niri, replacing the dunstify-based
+# ~/.config/sway/volume-osd.sh and brightness-osd.sh -- swayosd-client
+# (called directly from niri's binds{}) draws its own transient layer-shell
+# popup, independent of dunst and not part of waybar. Added to niri.service
+# via `systemctl --user add-wants niri.service swayosd-server.service`.
+#
+# Not using swayosd-libinput-backend.service (system service, root/polkit):
+# that's only for reacting to raw key events outside the compositor's own
+# binds; niri's binds{} already sees these keys directly.
+
+[Unit]
+PartOf=graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/swayosd-server
+Restart=on-failure

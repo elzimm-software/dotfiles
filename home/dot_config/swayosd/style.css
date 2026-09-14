@@ -1,0 +1,38 @@
+/* Horizon Dark, no rounded corners -- same palette/rule as
+   ~/.config/waybar/style.css. Based on the stock /etc/xdg/swayosd/style.css,
+   with @theme_bg_color/@theme_fg_color (GTK theme, not this palette) swapped
+   for the actual values and every border-radius zeroed. */
+window#osd {
+  border-radius: 0;
+  border: none;
+  background: alpha(#1e181a, 0.9); }
+  window#osd #container {
+    margin: 16px; }
+  window#osd image,
+  window#osd label {
+    color: #e0e0e0; }
+  window#osd progressbar:disabled,
+  window#osd image:disabled {
+    opacity: 0.5; }
+  window#osd progressbar,
+  window#osd segmentedprogress {
+    min-height: 6px;
+    border-radius: 0;
+    background: transparent;
+    border: none; }
+  window#osd trough,
+  window#osd segment {
+    min-height: inherit;
+    border-radius: 0;
+    border: none;
+    background: #5b5858; }
+  window#osd progress,
+  window#osd segment.active {
+    min-height: inherit;
+    border-radius: 0;
+    border: none;
+    background: #26bbd9; }
+  window#osd segment {
+    margin-left: 8px; }
+    window#osd segment:first-child {
+      margin-left: 0; }

@@ -47,6 +47,7 @@ packages:
     - sway                  # scroll's exec lines call swaymsg/swaynag, which ship in this package
     - swaybg
     - swayidle
+    - SwayOSD               # volume/brightness/lock-key OSD for niri, from Terra; replaces dunstify in volume-osd.sh/brightness-osd.sh there
     - Thunar
     - touchegg
     - vim-enhanced
