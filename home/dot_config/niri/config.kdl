@@ -139,11 +139,12 @@ binds {
     // --- Customized on top of niri's stock default-config.kdl; everything
     // else below this point is untouched. Mod+D (fuzzel) and Mod+T
     // (alacritty) dropped as redundant with Mod+Space/Mod+Return below.
-    // Add Mod+C (emacs) back later if it's missed -- Mod+C currently still
-    // means center-column (niri default), further down. ---
+    // Mod+C takes over center-column's default key -- no use found for
+    // centering a column on its own, further down. ---
     Mod+Return hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
     Mod+Space hotkey-overlay-title="Run an Application: rofi" { spawn "rofi" "-show" "drun" "-show-icons"; }
     Mod+B hotkey-overlay-title="Open the Browser: firefox" { spawn "firefox"; }
+    Mod+C hotkey-overlay-title="Open Emacs" { spawn "emacs"; }
 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
@@ -275,8 +276,6 @@ binds {
     Mod+M { maximize-window-to-edges; }
 
     Mod+Ctrl+F { expand-column-to-available-width; }
-
-    Mod+C { center-column; }
 
     Mod+Ctrl+C { center-visible-columns; }
 
