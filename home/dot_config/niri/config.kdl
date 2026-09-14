@@ -89,6 +89,10 @@ overview {
     backdrop-color "#1e181a"
 }
 
+hotkey-overlay {
+    skip-at-startup
+}
+
 spawn-at-startup "waybar"
 
 spawn-at-startup "gsettings" "set" "org.gnome.desktop.interface" "color-scheme" "prefer-dark"
