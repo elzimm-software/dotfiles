@@ -1,13 +1,22 @@
 #!/usr/bin/bash
-# Installs packages listed in .chezmoidata/packages.yaml. chezmoi hashes
-# this script's rendered content, so editing the package list changes the
-# hash and this re-runs on the next `chezmoi apply`.
+# Installs everything listed in .chezmoidata/packages.yaml: dnf packages,
+# cargo packages, COPR repos, third-party repos, and personal forks that
+# need building from source. chezmoi hashes this script's rendered content,
+# so editing packages.yaml changes the hash and this re-runs on the next
+# `chezmoi apply`.
 #
 # Already-installed/enabled/configured state is skipped, so a no-op run
-# (nothing new) never invokes sudo and never prompts for a password.
+# never invokes sudo and never prompts for a password.
 
 set -euo pipefail
 
+# --- dnf packages -----------------------------------------------------
+# Checked against `dnf repoquery --userinstalled`, not just `rpm -q`: a
+# package that's only present as a dependency of something else is still
+# explicitly marked (`dnf mark user`), so it can't quietly vanish under a
+# future `dnf autoremove` of whatever pulled it in. dnf5 hard-errors if you
+# `dnf install` something already installed (unlike dnf4's silent no-op),
+# so installing and marking have to be two separate, disjoint steps.
 packages=(
 {{- range .packages.common }}
     {{ . | quote }}
@@ -17,19 +26,113 @@ packages=(
 {{- end }}
 )
 
-missing=()
+userinstalled=$(dnf repoquery --userinstalled --qf '%{name}\n' 2>/dev/null)
+not_installed=()
+not_marked=()
 for pkg in "${packages[@]}"; do
-    rpm -q "$pkg" >/dev/null 2>&1 || missing+=("$pkg")
+    if ! rpm -q "$pkg" >/dev/null 2>&1; then
+        not_installed+=("$pkg")
+    elif ! grep -qx "$pkg" <<<"$userinstalled"; then
+        not_marked+=("$pkg")
+    fi
 done
-if [ "${#missing[@]}" -gt 0 ]; then
-    echo "installing packages: ${missing[*]}"
-    sudo dnf install -y "${missing[@]}"
+if [ "${#not_installed[@]}" -gt 0 ]; then
+    echo "installing packages: ${not_installed[*]}"
+    sudo dnf install -y "${not_installed[@]}"
+fi
+if [ "${#not_marked[@]}" -gt 0 ]; then
+    echo "marking as user-installed: ${not_marked[*]}"
+    sudo dnf mark user "${not_marked[@]}"
 fi
 
-# seatd: fixes the scroll/sway VT-switch keymap bug (see the seatd comment
-# in ~/.config/scroll/config and ~/.config/sway/config). Needs its service
+# --- seatd --------------------------------------------------------------
+# Fixes the scroll/sway VT-switch keymap bug (see the seatd comment in
+# ~/.config/scroll/config and ~/.config/sway/config). Needs its service
 # enabled and this user in the `seat` group; both checks are re-run-safe.
 if rpm -q seatd >/dev/null 2>&1; then
     systemctl is-enabled --quiet seatd.service 2>/dev/null || sudo systemctl enable --now seatd.service
     id -nG "$USER" | grep -qw seat || sudo usermod -aG seat "$USER"
 fi
+
+# --- cargo packages -------------------------------------------------------
+# These live in ~/.cargo, not dnf -- bootstrap rustup itself first (to
+# ~/.cargo, no sudo) if it's missing, same as the official rustup.rs
+# installer. --no-modify-path because ~/.cargo/env is already sourced from
+# dot_zshenv/dot_bashrc/dot_profile.tmpl.
+cargo_packages=(
+{{- range .packages.cargo }}
+    {{ . | quote }}
+{{- end }}
+)
+
+if [ "${#cargo_packages[@]}" -gt 0 ]; then
+    if [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+        echo "installing rustup"
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+            | sh -s -- -y --default-toolchain stable --no-modify-path
+    fi
+    . "$HOME/.cargo/env"
+    for pkg in "${cargo_packages[@]}"; do
+        command -v "$pkg" >/dev/null 2>&1 || cargo install "$pkg"
+    done
+fi
+
+# --- COPR repos -------------------------------------------------------
+{{- range .packages.copr }}
+copr_id={{ . | quote }}
+copr_file="/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:${copr_id/\//:}.repo"
+if [ ! -f "$copr_file" ] || ! grep -qx "enabled=1" "$copr_file"; then
+    echo "enabling copr: $copr_id"
+    sudo dnf copr enable -y "$copr_id"
+fi
+{{- end }}
+
+# --- Third-party repos ---------------------------------------------------
+# Each enabled a different way -- resolved against this machine's actual
+# repo files and `dnf history info` for the exact commands originally
+# used, not guessed. The check is uniform (dnf repolist --enabled) because
+# `id` is the repoid dnf itself registers, covering the openh264 case
+# too, where the repo file already ships and only needs enabling.
+{{- range .packages.repos }}
+if ! dnf repolist --enabled 2>/dev/null | awk '{print $1}' | grep -qx {{ .id | quote }}; then
+    echo "enabling repo: {{ .id }}"
+    sudo bash -s <<'REPO_INSTALL_EOF'
+{{ .install }}
+REPO_INSTALL_EOF
+fi
+{{- end }}
+
+# --- Personal forks -------------------------------------------------------
+# Cloned to ~/Projects/<name> (matching passprompt_override.example's
+# existing convention for askpass), re-pulled and rebuilt every run --
+# cheap, since ninja/cmake incremental builds no-op when nothing changed.
+# A missing or failing build.sh only warns; it never aborts this script.
+mkdir -p "$HOME/Projects"
+{{- range .packages.forks }}
+dir="$HOME/Projects/{{ .name }}"
+{{- if index . "source" }}
+if [ -d "$dir/.git" ]; then
+    git -C "$dir" pull --ff-only || echo "warning: {{ .name }}: git pull failed, continuing with existing checkout"
+else
+    git clone {{ .source | quote }} "$dir" || echo "warning: {{ .name }}: clone of source failed, skipping"
+fi
+if [ -d "$dir" ]; then
+    build_tmp=$(mktemp -d)
+    if git clone --depth 1 {{ .repo | quote }} "$build_tmp" >/dev/null 2>&1 && [ -f "$build_tmp/build.sh" ]; then
+        cp "$build_tmp/build.sh" "$dir/build.sh"
+    fi
+    rm -rf "$build_tmp"
+fi
+{{- else }}
+if [ -d "$dir/.git" ]; then
+    git -C "$dir" pull --ff-only || echo "warning: {{ .name }}: git pull failed, continuing with existing checkout"
+else
+    git clone {{ .repo | quote }} "$dir" || echo "warning: {{ .name }}: clone failed, skipping"
+fi
+{{- end }}
+if [ -f "$dir/build.sh" ]; then
+    ( cd "$dir" && bash build.sh ) || echo "warning: {{ .name }}: build.sh failed, continuing"
+else
+    echo "note: {{ .name }}: no build.sh yet, skipping build"
+fi
+{{- end }}

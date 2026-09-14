@@ -1,5 +1,123 @@
+# Packages this dotfiles setup expects, driven by what the tracked configs
+# actually reference (see run_onchange_after_10-install-packages.sh.tmpl).
+# Resolved against this machine via `rpm -qf $(command -v <bin>)` for every
+# binary referenced in exec/command lines, .desktop Exec=, and dedicated
+# config files (dunstrc, alacritty.toml, etc). Cross-checked against `dnf
+# repoquery --userinstalled` too, so the script always explicitly requests
+# every entry -- an already-installed package that's only present as a
+# dependency of something else still gets promoted to user-installed,
+# instead of silently staying one `dnf autoremove` away from disappearing.
+#
+# Deliberately NOT listed under `common`, even though referenced in configs:
+#   - swaylock (~/.config/swaylock/config) and lxqt-openssh-askpass (used by
+#     ~/.local/bin/claude-sudo) -- both custom forks, not stock repo
+#     packages. See `forks` below for how they're built.
+#   - starship (~/.config/starship.toml) -- see `cargo` below instead; it's
+#     cargo-installed, not dnf.
 packages:
   common:
+    - alacritty
+    - bc                    # i3blocks CPU usage script
+    - brightnessctl
+    - clang-tools-extra     # clangd + clang-format, for dot_config/clangd and dot_clang-format
+    - cmake                 # zsh/completions/_cmake, _cpack, _ctest
+    - dex-autostart
+    - dunst
+    - emacs
+    - firefox
+    - flameshot             # config still tracked, though autostart was dropped -- see git log
+    - gh
+    - gnome-keyring
+    - gnupg2                # git commit signing (gpgsign=true)
+    - golang                # zsh/completions/_golang
+    - grim
+    - htop
+    - i3blocks
+    - network-manager-applet
+    - pamixer
+    - pavucontrol
+    - pipewire
+    - playerctl
+    - pulseaudio-utils      # pactl, used by idle-dim.sh
+    - rofi
+    - satty                 # screenshot.sh depends on this; was missing until this audit found it
+    - scroll
     - seatd
+    - slurp
+    - sway                  # scroll's exec lines call swaymsg/swaynag, which ship in this package
+    - swaybg
+    - swayidle
+    - Thunar
+    - touchegg
+    - vim-enhanced
+    - volumeicon
+    - wireplumber
+    - wl-clipboard
+    - xdg-desktop-portal-gtk
+    - xdg-desktop-portal-wlr
   laptop: []
-  desktop: []
+  desktop:
+    - xrandr                 # used by system/usr/local/bin/desktop-monitors.sh
+
+  # Installed via `cargo install`, not dnf. The script bootstraps rustup
+  # itself (to ~/.cargo, no sudo) if it isn't already present.
+  cargo:
+    - starship
+
+  # COPR repos, enabled via `dnf copr enable -y <entry>`. Empty right now --
+  # the one that used to be here (tokariew/i3lock-color, providing
+  # i3lock-color) was an i3/X11-era leftover: i3lock-color doesn't work
+  # under Wayland, and the swaylock fork replaced it. Disabled + removed
+  # during this audit. Kept as a section so a real future COPR has
+  # somewhere to go.
+  copr: []
+
+  # Third-party repos, each enabled a different way -- resolved against
+  # this machine's actual /etc/yum.repos.d/*.repo files and `dnf history
+  # info` for the exact commands originally used, rather than guessed.
+  # `id` must match the repoid dnf actually registers (dnf repolist), so
+  # the idempotency check (`dnf repolist --enabled`) works uniformly
+  # across all of them, including the openh264 case where the repo file
+  # already ships and only needs its enabled flag flipped.
+  repos:
+    - id: rpmfusion-free
+      install: dnf install -y "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+    - id: rpmfusion-nonfree
+      install: dnf install -y "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+    - id: terra
+      install: dnf install -y --nogpgcheck --repofrompath "terra,https://repos.fyralabs.com/terra$(rpm -E %fedora)" terra-release
+    - id: docker-ce-stable
+      install: dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
+    - id: vscodium
+      install: |
+        rpm --import https://repo.vscodium.dev/vscodium.gpg
+        printf '%s\n' \
+          '[vscodium]' \
+          'name=VSCodium Repo' \
+          'baseurl=https://repo.vscodium.dev/rpm' \
+          'enabled=1' \
+          'gpgcheck=1' \
+          'repo_gpgcheck=1' \
+          'gpgkey=https://repo.vscodium.dev/vscodium.gpg' \
+          'metadata_expire=1h' > /etc/yum.repos.d/vscodium.repo
+    - id: fedora-cisco-openh264
+      install: dnf config-manager setopt fedora-cisco-openh264.enabled=1
+
+  # Personal forks/build-recipe repos that need building from source, not
+  # dnf. Cloned to ~/Projects/<name> (matching passprompt_override.example's
+  # existing convention for askpass) and re-pulled + rebuilt on every run --
+  # cheap since ninja/cmake incremental builds no-op when nothing changed.
+  # A failed or missing build.sh only warns, it never aborts the rest of
+  # this script.
+  #
+  # `source`, when set, is the actual upstream to clone (not GitHub-hosted,
+  # so not something that could be forked there); `repo` is then just where
+  # build.sh lives, fetched separately and dropped into the source checkout.
+  # When `source` is omitted, `repo` is both the source and the build
+  # recipe -- a real fork, like askpass.
+  forks:
+    - name: lxqt-nonssh-askpass
+      repo: git@github.com:elzimm-software/lxqt-nonssh-askpass.git
+    - name: swaylock
+      repo: git@github.com:elzimm-software/swaylock-build.git
+      source: https://git.sr.ht/~mvforell/swaylock
