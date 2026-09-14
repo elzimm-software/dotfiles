@@ -89,18 +89,6 @@ packages:
       install: dnf install -y --nogpgcheck --repofrompath "terra,https://repos.fyralabs.com/terra$(rpm -E %fedora)" terra-release
     - id: docker-ce-stable
       install: dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
-    - id: vscodium
-      install: |
-        rpm --import https://repo.vscodium.dev/vscodium.gpg
-        printf '%s\n' \
-          '[vscodium]' \
-          'name=VSCodium Repo' \
-          'baseurl=https://repo.vscodium.dev/rpm' \
-          'enabled=1' \
-          'gpgcheck=1' \
-          'repo_gpgcheck=1' \
-          'gpgkey=https://repo.vscodium.dev/vscodium.gpg' \
-          'metadata_expire=1h' > /etc/yum.repos.d/vscodium.repo
     - id: fedora-cisco-openh264
       install: dnf config-manager setopt fedora-cisco-openh264.enabled=1
 
@@ -117,8 +105,8 @@ packages:
   # When `source` is omitted, `repo` is both the source and the build
   # recipe -- a real fork, like askpass.
   forks:
-    - name: lxqt-nonssh-askpass
-      repo: git@github.com:elzimm-software/lxqt-nonssh-askpass.git
-    - name: swaylock
-      repo: git@github.com:elzimm-software/swaylock-build.git
-      source: https://git.sr.ht/~mvforell/swaylock
+    #- name: lxqt-nonssh-askpass
+    #  repo: git@github.com:elzimm-software/lxqt-nonssh-askpass.git
+    #- name: swaylock
+    #  repo: git@github.com:elzimm-software/swaylock-build.git
+    #  source: https://git.sr.ht/~mvforell/swaylock
