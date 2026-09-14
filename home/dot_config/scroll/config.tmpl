@@ -91,6 +91,20 @@ input type:keyboard {
     xkb_options compose:ralt
 }
 
+# seatd is required. Without it, libseat falls back to talking to logind
+# directly, and nothing in that path ends up opening /dev/ttyN to put the
+# compositor's VT into raw/graphics mode -- confirmed via `dumpkeys -C
+# /dev/ttyN` showing K_UNICODE and no /dev/tty fd in scroll's /proc/<pid>/fd
+# while it owned the seat. Left in K_UNICODE, the kernel's own console
+# keymap (/usr/lib/kbd/keymaps/xkb/us.map.gz) is live: it binds alt+Left/
+# Right to Decr_Console/Incr_Console (VT switch), and separately aliases
+# both Super/Win keys to act as Alt in every modifier state -- so alt+Left/
+# Right *and* super+Left/Right both switched ttys instead of doing anything
+# in the compositor. Fix (needs a fresh login/reboot to take effect):
+#   sudo dnf install seatd
+#   sudo systemctl enable --now seatd.service
+#   sudo usermod -aG seat $USER
+
 ### scroll layout model -----------------------------------------------------
 
 layout_default_width 0.5
