@@ -1,0 +1,35 @@
+#!/usr/bin/bash
+# Installs packages listed in .chezmoidata/packages.yaml. chezmoi hashes
+# this script's rendered content, so editing the package list changes the
+# hash and this re-runs on the next `chezmoi apply`.
+#
+# Already-installed/enabled/configured state is skipped, so a no-op run
+# (nothing new) never invokes sudo and never prompts for a password.
+
+set -euo pipefail
+
+packages=(
+{{- range .packages.common }}
+    {{ . | quote }}
+{{- end }}
+{{- range (index .packages .machine) }}
+    {{ . | quote }}
+{{- end }}
+)
+
+missing=()
+for pkg in "${packages[@]}"; do
+    rpm -q "$pkg" >/dev/null 2>&1 || missing+=("$pkg")
+done
+if [ "${#missing[@]}" -gt 0 ]; then
+    echo "installing packages: ${missing[*]}"
+    sudo dnf install -y "${missing[@]}"
+fi
+
+# seatd: fixes the scroll/sway VT-switch keymap bug (see the seatd comment
+# in ~/.config/scroll/config and ~/.config/sway/config). Needs its service
+# enabled and this user in the `seat` group; both checks are re-run-safe.
+if rpm -q seatd >/dev/null 2>&1; then
+    systemctl is-enabled --quiet seatd.service 2>/dev/null || sudo systemctl enable --now seatd.service
+    id -nG "$USER" | grep -qw seat || sudo usermod -aG seat "$USER"
+fi
