@@ -1,13 +1,18 @@
 /* Horizon Dark, no rounded corners -- same palette/rule as
    ~/.config/waybar/style.css. Based on the stock /etc/xdg/swayosd/style.css,
    with @theme_bg_color/@theme_fg_color (GTK theme, not this palette) swapped
-   for the actual values and every border-radius zeroed. */
+   for the actual values and every border-radius zeroed.
+   The icon and slider's own size are set programmatically (SwayOSD 0.3.2)
+   and don't respond to CSS at all -- tried min-width/min-height and
+   -gtk-icon-size down to extreme values (40px, 16px) with zero visible
+   change, confirmed by screenshot diff. Only margin/colors/radius are
+   actually stylesheet-controlled. */
 window#osd {
   border-radius: 0;
   border: none;
   background: alpha(#1e181a, 0.9); }
   window#osd #container {
-    margin: 16px; }
+    margin: 8px; }
   window#osd image,
   window#osd label {
     color: #e0e0e0; }

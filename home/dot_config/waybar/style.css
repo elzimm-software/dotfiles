@@ -48,15 +48,21 @@ window#waybar {
 /* i3blocks/swaybar drew a #5b5858 separator between status blocks; waybar
    has no built-in equivalent, so approximate it with a left border on each
    right-side module. */
-#custom-spotify,
+#cpu,
+#memory,
+#disk,
+#battery,
+#clock {
+    border-left: 1px solid #5b5858;
+    border-radius: 0; /* GTK/Adwaita rounds these by default */
+}
+
 #cpu,
 #memory,
 #disk,
 #battery,
 #clock {
     padding: 0 8px;
-    border-left: 1px solid #5b5858;
-    border-radius: 0; /* GTK/Adwaita rounds these by default */
 }
 
 #custom-spotify {
