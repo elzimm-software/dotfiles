@@ -133,6 +133,16 @@ window-rule {
     open-floating true
 }
 
+// satty (screenshot annotation, launched via Print's screenshot.sh
+// pipeline below) -- matches sway config's
+// `for_window [app_id="com.gabm.satty"] floating enable, move position
+// center`. No default-floating-position needed: niri already centers new
+// floating windows by default.
+window-rule {
+    match app-id="com.gabm.satty"
+    open-floating true
+}
+
 binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
@@ -294,7 +304,10 @@ binds {
 
     Mod+W { toggle-column-tabbed-display; }
 
-    Print { screenshot; }
+    // Region screenshot -> satty (annotate) -> clipboard, same pipeline as
+    // ~/.config/sway/config's Print bind -- not niri's built-in screenshot
+    // action, which just drops a PNG in ~/Pictures/Screenshots.
+    Print { spawn-sh "~/.config/sway/screenshot.sh"; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
 
