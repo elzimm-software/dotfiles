@@ -81,6 +81,31 @@ output "HDMI-A-1" {
     position x=3000 y=0
 }
 
+// Fixed per-monitor workspaces for the desktop's 3-output spread. niri's
+// workspaces are per-output stacks by default (`focus-workspace 1` means
+// "1st workspace of whichever monitor is focused", not a single global
+// slot) -- confusing coming from sway/scroll's global numbering, and not
+// worth fighting since a scrollable-tiling layout rarely needs more than
+// one workspace per screen anyway (see Mod+1/2/3 below; Mod+4..9 are left
+// as the old per-monitor dynamic index behavior for the rare case one of
+// these needs a second workspace).
+//
+// Named workspaces always exist and (since niri 25.02) stick to their
+// declared output even as windows come and go, so "1"/"2"/"3" are a stable,
+// direct target from any monitor -- no more Mod+Ctrl+arrow monitor-hop
+// before the number keys make sense. Inert-ish on the laptop (all three
+// just pile onto eDP-1, the only output that exists there) rather than
+// templated, matching this file's existing machine-agnostic approach.
+workspace "1" {
+    open-on-output "DP-2"
+}
+workspace "2" {
+    open-on-output "HDMI-A-2"
+}
+workspace "3" {
+    open-on-output "HDMI-A-1"
+}
+
 // Ask apps to omit client-side decorations (title bars) -- niri draws its
 // own focus-ring/border instead. Apps that insist on CSD still get it.
 // Already-running apps need a restart to actually drop their title bar.
@@ -274,18 +299,23 @@ binds {
     Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
     Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
 
-    Mod+1 { focus-workspace 1; }
-    Mod+2 { focus-workspace 2; }
-    Mod+3 { focus-workspace 3; }
+    // "1"/"2"/"3" (quoted) are the fixed per-monitor named workspaces
+    // declared above -- DP-2/HDMI-A-2/HDMI-A-1 respectively, reachable
+    // directly from any monitor. 4-9 (bare, unquoted) stay index-based:
+    // the old "Nth dynamic workspace of the focused monitor" behavior, as
+    // a fallback for the rare case a monitor needs a second workspace.
+    Mod+1 { focus-workspace "1"; }
+    Mod+2 { focus-workspace "2"; }
+    Mod+3 { focus-workspace "3"; }
     Mod+4 { focus-workspace 4; }
     Mod+5 { focus-workspace 5; }
     Mod+6 { focus-workspace 6; }
     Mod+7 { focus-workspace 7; }
     Mod+8 { focus-workspace 8; }
     Mod+9 { focus-workspace 9; }
-    Mod+Ctrl+1 { move-column-to-workspace 1; }
-    Mod+Ctrl+2 { move-column-to-workspace 2; }
-    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+1 { move-column-to-workspace "1"; }
+    Mod+Ctrl+2 { move-column-to-workspace "2"; }
+    Mod+Ctrl+3 { move-column-to-workspace "3"; }
     Mod+Ctrl+4 { move-column-to-workspace 4; }
     Mod+Ctrl+5 { move-column-to-workspace 5; }
     Mod+Ctrl+6 { move-column-to-workspace 6; }
