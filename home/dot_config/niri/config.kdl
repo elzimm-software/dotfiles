@@ -67,7 +67,11 @@ output "HDMI-A-2" {
     }
 }
 output "HDMI-A-1" {
-    mode "1920x1080@59.940"
+    // The refresh rate here must match *exactly* to 3 decimals (see
+    // `niri msg outputs`) or niri silently falls back to this output's
+    // preferred mode (1360x768@60) instead -- 59.940 doesn't match the
+    // TV's actual 59.939.
+    mode "1920x1080@59.939"
     position x=3000 y=0
 }
 
