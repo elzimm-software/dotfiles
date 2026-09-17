@@ -53,7 +53,13 @@ output "DP-2" {
 output "HDMI-A-2" {
     mode "1920x1080@75"
     position x=0 y=-840
-    transform "270"
+    // sway/scroll's `transform 270` (their man page: "rotation is performed
+    // clockwise") is the SAME physical rotation as niri's `transform "90"`
+    // (niri's own docs: "rotate the output counter-clockwise") -- the two
+    // compositors count rotation in opposite directions for the same
+    // numeric value. Copying sway's "270" literally here rotated the panel
+    // 180 degrees off from correct (upside down).
+    transform "90"
 
     // HDMI-A-2 is physically portrait. niri always scrolls columns
     // horizontally (no per-output axis flip like scroll's layout_type
