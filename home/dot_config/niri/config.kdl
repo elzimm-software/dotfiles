@@ -54,6 +54,17 @@ output "HDMI-A-2" {
     mode "1920x1080@75"
     position x=0 y=-840
     transform "270"
+
+    // HDMI-A-2 is physically portrait. niri always scrolls columns
+    // horizontally (no per-output axis flip like scroll's layout_type
+    // vertical), but this at least matches scroll's other portrait-monitor
+    // override: new columns open full width instead of the global preset
+    // width, since a half-width column on a rotated 1080-wide output is
+    // unusably narrow. See ~/.config/scroll/config.tmpl's `output HDMI-A-2
+    // layout_default_width 1.0`.
+    layout {
+        default-column-width { proportion 1.0; }
+    }
 }
 output "HDMI-A-1" {
     mode "1920x1080@59.940"

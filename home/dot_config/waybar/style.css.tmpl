@@ -7,7 +7,11 @@
        look and every icon glyph. "Hack Nerd Font Mono" is the real font:
        Hack's glyphs merged with the Nerd Font icon set, fixed-width. */
     font-family: "Hack Nerd Font Mono", "Symbols Nerd Font Mono";
-    font-size: 12px;
+    /* Matches sway/scroll's bar font size (`pango:Hack, Symbols Nerd Font
+       Mono 11`/9 in their config.tmpl) instead of a fixed px value, so the
+       bar text is the same size across compositors on a given machine. GTK
+       CSS accepts pt as a font-size unit, same as everywhere else here. */
+    font-size: {{ if eq .machine "desktop" }}11pt{{ else }}9pt{{ end }};
     min-height: 0;
 }
 
