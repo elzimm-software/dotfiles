@@ -34,6 +34,7 @@ packages:
     - htop
     - i3blocks
     - network-manager-applet
+    - niri                  # dot_config/niri/config.kdl
     - pamixer
     - pavucontrol
     - pipewire
@@ -52,6 +53,7 @@ packages:
     - touchegg
     - vim-enhanced
     - volumeicon
+    - waybar                # niri's bar, dot_config/waybar/
     - wireplumber
     - wl-clipboard
     - xdg-desktop-portal-gtk
