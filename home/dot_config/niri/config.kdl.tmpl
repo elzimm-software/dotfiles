@@ -10,12 +10,11 @@
 // fall back to niri's built-in defaults -- niri only requires binds {} to be
 // written out in full (see Configuration:-Key-Bindings.md).
 //
-// Machine-agnostic on purpose: output/touchpad blocks below are matched by
-// name and are simply inert on a machine where that output/device doesn't
-// exist, so one file covers both the laptop and desktop without templating
-// (unlike ~/.config/scroll/config.tmpl and ~/.config/sway/config.tmpl, which
-// need `{{ if eq .machine ... }}` because sway/scroll require `force` and
-// warn on settings that don't apply).
+// Templated like ~/.config/scroll/config.tmpl and ~/.config/sway/config.tmpl,
+// branching on the `machine` chezmoi data var: output/workspace blocks and
+// the fixed per-monitor workspace binds only make sense for one machine or
+// the other, so they're gated explicitly here rather than left to rely on
+// niri quietly no-op'ing an output block for hardware that isn't there.
 
 input {
     keyboard {
@@ -36,16 +35,16 @@ input {
     }
 }
 
-// Laptop: HiDPI panel. Unlike scroll, niri doesn't warn or need `force` for
-// a non-integer scale.
+{{ if eq .machine "laptop" -}}
+// HiDPI panel. Unlike scroll, niri doesn't warn or need `force` for a
+// non-integer scale.
 output "eDP-1" {
     scale 1.7
 }
-
-// Desktop: HDMI-A-2 (Acer KA272, vertical, left) - DP-2 (primary, center) -
-// HDMI-A-1 (Vizio TV, right). wlroots names HDMI outputs differently than
-// xrandr did (confirmed by EDID, not by name). Inert on the laptop, since
-// none of these outputs exist there.
+{{ else -}}
+// HDMI-A-2 (Acer KA272, vertical, left) - DP-2 (primary, center) - HDMI-A-1
+// (Vizio TV, right). wlroots names HDMI outputs differently than xrandr did
+// (confirmed by EDID, not by name).
 output "DP-2" {
     mode "1920x1080@240"
     position x=1080 y=0
@@ -81,21 +80,19 @@ output "HDMI-A-1" {
     position x=3000 y=0
 }
 
-// Fixed per-monitor workspaces for the desktop's 3-output spread. niri's
-// workspaces are per-output stacks by default (`focus-workspace 1` means
-// "1st workspace of whichever monitor is focused", not a single global
-// slot) -- confusing coming from sway/scroll's global numbering, and not
-// worth fighting since a scrollable-tiling layout rarely needs more than
-// one workspace per screen anyway (see Mod+1/2/3 below; Mod+4..9 are left
-// as the old per-monitor dynamic index behavior for the rare case one of
-// these needs a second workspace).
+// Fixed per-monitor workspaces for this 3-output spread. niri's workspaces
+// are per-output stacks by default (`focus-workspace 1` means "1st
+// workspace of whichever monitor is focused", not a single global slot) --
+// confusing coming from sway/scroll's global numbering, and not worth
+// fighting since a scrollable-tiling layout rarely needs more than one
+// workspace per screen anyway (see the desktop Mod+1/2/3 binds below;
+// Mod+4..9 are left as the old per-monitor dynamic index behavior for the
+// rare case one of these needs a second workspace).
 //
 // Named workspaces always exist and (since niri 25.02) stick to their
 // declared output even as windows come and go, so "1"/"2"/"3" are a stable,
 // direct target from any monitor -- no more Mod+Ctrl+arrow monitor-hop
-// before the number keys make sense. Inert-ish on the laptop (all three
-// just pile onto eDP-1, the only output that exists there) rather than
-// templated, matching this file's existing machine-agnostic approach.
+// before the number keys make sense.
 workspace "1" {
     open-on-output "DP-2"
 }
@@ -105,7 +102,7 @@ workspace "2" {
 workspace "3" {
     open-on-output "HDMI-A-1"
 }
-
+{{ end }}
 // Ask apps to omit client-side decorations (title bars) -- niri draws its
 // own focus-ring/border instead. Apps that insist on CSD still get it.
 // Already-running apps need a restart to actually drop their title bar.
@@ -299,6 +296,7 @@ binds {
     Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
     Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
 
+{{ if eq .machine "desktop" }}
     // "1"/"2"/"3" (quoted) are the fixed per-monitor named workspaces
     // declared above -- DP-2/HDMI-A-2/HDMI-A-1 respectively, reachable
     // directly from any monitor. 4-9 (bare, unquoted) stay index-based:
@@ -313,16 +311,38 @@ binds {
     Mod+7 { focus-workspace 7; }
     Mod+8 { focus-workspace 8; }
     Mod+9 { focus-workspace 9; }
-    Mod+Ctrl+1 { move-column-to-workspace "1"; }
-    Mod+Ctrl+2 { move-column-to-workspace "2"; }
-    Mod+Ctrl+3 { move-column-to-workspace "3"; }
-    Mod+Ctrl+4 { move-column-to-workspace 4; }
-    Mod+Ctrl+5 { move-column-to-workspace 5; }
-    Mod+Ctrl+6 { move-column-to-workspace 6; }
-    Mod+Ctrl+7 { move-column-to-workspace 7; }
-    Mod+Ctrl+8 { move-column-to-workspace 8; }
-    Mod+Ctrl+9 { move-column-to-workspace 9; }
-
+    Mod+Shift+1 { move-column-to-workspace "1"; }
+    Mod+Shift+2 { move-column-to-workspace "2"; }
+    Mod+Shift+3 { move-column-to-workspace "3"; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+{{ else }}
+    // Single output, so plain index-based workspace switching (niri's
+    // stock default-config.kdl behavior) is effectively global already --
+    // no fixed named workspaces needed here, unlike the desktop.
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+{{ end }}
     Mod+BracketLeft  { consume-or-expel-window-left; }
     Mod+BracketRight { consume-or-expel-window-right; }
 
