@@ -229,3 +229,81 @@
       :desc "Claude Code" "o c" claude-code-command-map
       :desc "Claude IDE (monet)" "o m" monet-command-map)
 {{ end }}
+
+;;; Arduino
+;; arduino-mode: .ino/.pde major mode (derived from c++-mode).
+;; arduino-cli-mode: compile/upload/monitor/board/lib commands (SPC m ...).
+;; LSP: arduino-language-server wraps clangd; it needs the board FQBN, which
+;; is read from sketch.yaml (`arduino-cli board attach`) or the buffer-local
+;; `my/arduino-fqbn' (set via .dir-locals.el) as a fallback.
+(defvar-local my/arduino-fqbn nil
+  "Fallback FQBN for arduino-language-server, e.g. \"arduino:avr:uno\".")
+
+(defun my/arduino-sketch-fqbn ()
+  "Return the sketch's FQBN from sketch.yaml `default_fqbn', else `my/arduino-fqbn'."
+  (or (when-let* ((dir (locate-dominating-file default-directory "sketch.yaml"))
+                  (file (expand-file-name "sketch.yaml" dir)))
+        (with-temp-buffer
+          (insert-file-contents file)
+          (when (re-search-forward "^default_fqbn:[ \t]*\\(.+\\)$" nil t)
+            (string-trim (match-string 1)))))
+      my/arduino-fqbn))
+
+(use-package! arduino-mode
+  :mode "\\.\\(ino\\|pde\\)\\'"
+  :config
+  (add-hook 'arduino-mode-hook
+            (lambda ()
+              (setq-local c-basic-offset 2
+                          tab-width 2
+                          indent-tabs-mode nil))))
+
+(defun my/arduino-board-attach (fqbn)
+  "Write FQBN (and the default port) into this sketch's sketch.yaml."
+  (interactive
+   (list (read-string "FQBN (e.g. arduino:avr:uno): " (my/arduino-sketch-fqbn))))
+  (let ((dir (or (locate-dominating-file default-directory "sketch.yaml")
+                 default-directory)))
+    (compile (format "arduino-cli board attach -b %s %s"
+                     (shell-quote-argument fqbn) (shell-quote-argument dir)))))
+
+(use-package! arduino-cli-mode
+  :hook arduino-mode
+  :config
+  (setq arduino-cli-default-port "/dev/ttyACM0"
+        arduino-cli-warnings 'all
+        arduino-cli-verify t)
+  (map! :map arduino-mode-map
+        :localleader
+        :desc "Compile"        "c" #'arduino-cli-compile
+        :desc "Upload"         "u" #'arduino-cli-upload
+        :desc "Compile+upload" "b" #'arduino-cli-compile-and-upload
+        :desc "Serial monitor" "m" #'arduino-cli-monitor
+        :desc "Board attach"   "a" #'my/arduino-board-attach
+        :desc "Install lib"    "l" #'arduino-cli-lib-install
+        :desc "Install core"   "i" #'arduino-cli-core-install
+        :desc "Board list"     "B" #'arduino-cli-board-list))
+
+(after! lsp-mode
+  (add-to-list 'lsp-language-id-configuration '(arduino-mode . "arduino"))
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection
+    (lsp-stdio-connection
+     (lambda ()
+       (let ((fqbn (my/arduino-sketch-fqbn)))
+         (append
+          (list "arduino-language-server"
+                "-cli" "arduino-cli"
+                "-cli-config" (expand-file-name "~/.arduino15/arduino-cli.yaml")
+                "-clangd" "clangd")
+          (when fqbn (list "-fqbn" fqbn))))))
+    :activation-fn (lsp-activate-on "arduino")
+    :major-modes '(arduino-mode)
+    :server-id 'arduino-language-server)))
+
+(add-hook 'arduino-mode-hook
+          (lambda ()
+            (if (my/arduino-sketch-fqbn)
+                (lsp-deferred)
+              (message "Arduino: no FQBN (run `arduino-cli board attach' or set my/arduino-fqbn); LSP skipped"))))
