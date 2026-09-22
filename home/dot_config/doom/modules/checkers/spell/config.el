@@ -14,9 +14,12 @@
 (use-package! jinx
   :init
   (setq jinx-languages "en_US")
-  ;; text-mode covers org/markdown/etc; prog-mode checks comments + docstrings +
-  ;; string literals (jinx's default `jinx-include-faces').
-  (add-hook! '(text-mode-hook git-commit-mode-hook prog-mode-hook) #'jinx-mode)
+  ;; text-mode covers org/markdown/etc. Off by default in prog-mode buffers --
+  ;; jinx there checks comments + docstrings + string literals (jinx's default
+  ;; `jinx-include-faces'), which is too noisy to have on unconditionally
+  ;; (string literals in particular: identifiers, paths, format strings, ...).
+  ;; Toggle per-buffer with `SPC t s' / `jinx-mode' when wanted.
+  (add-hook! '(text-mode-hook git-commit-mode-hook) #'jinx-mode)
   :config
   ;; Red wavy underline for misspellings, matching the old `flyspell-incorrect'
   ;; look. That face isn't loaded (Doom's flyspell is gone), so take the colour
@@ -48,6 +51,23 @@
         :n "]s" #'jinx-next
         :n "[s" #'jinx-previous)
   (map! :leader :desc "Spell checker" "t s" #'jinx-mode)
+  ;; cc-mode fontifies `#include <foo.h>' / "foo.h" headers with
+  ;; `font-lock-string-face', same as real string literals, so jinx (which
+  ;; checks that face by default) flags header names like "ctype" as
+  ;; misspellings. The `#include' keyword itself is safe -- it gets
+  ;; `font-lock-preprocessor-face', which jinx never checks. Skip words on
+  ;; `#include' lines specifically, leaving real string literals (and
+  ;; #error/#warning message text, which is prose) still spell-checked.
+  (defun +spell--jinx-include-line-p (start)
+    "Treat words on a #include line as valid so jinx skips them."
+    (save-match-data
+      (save-excursion
+        (goto-char start)
+        (beginning-of-line)
+        (looking-at-p "[ \t]*#[ \t]*include\\_>"))))
+  (add-hook! '(c-mode-hook c++-mode-hook c-ts-mode-hook c++-ts-mode-hook
+               objc-mode-hook)
+    (add-hook 'jinx--predicates #'+spell--jinx-include-line-p nil t))
   ;; Left-click a misspelled word to run `jinx-correct' (the same minibuffer UI
   ;; as z=). Drop jinx's graphical popup on mouse-3 entirely.
   (keymap-set jinx-overlay-map "<mouse-1>" #'+spell/jinx-correct-at-mouse)
