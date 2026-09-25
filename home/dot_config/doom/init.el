@@ -198,7 +198,6 @@
        :personal
        ruby-lsp          ; ruby-lsp + Bundler gem provisioning
        cc-sync           ; C/C++ header <-> source prototype/stub sync
-       ros-container     ; LSP in the ROS 2 podman dev container
 
        :config
        ;;literate
