@@ -1,0 +1,33 @@
+# vim: ft=systemd
+#
+# Doom Emacs daemon, overriding Fedora's /usr/lib/systemd/user/emacs.service.
+# Enabled with `systemctl --user enable emacs.service`, which links it into
+# graphical-session.target.wants. That target is pulled up by niri.service
+# under niri and by sway-session.target (exec'd from the config) under
+# scroll and sway, so one unit covers every compositor.
+#
+# Bound to graphical-session.target rather than default.target because this
+# is a PGTK build: a PGTK daemon holds a Wayland connection and dies (or
+# wedges) when the compositor goes away, so it should start after the session
+# has exported WAYLAND_DISPLAY and stop/restart along with it.
+#
+# Connect with `emacsclient -c -a ""` (Mod+C in niri, $mod+c in scroll/sway).
+
+[Unit]
+Description=Emacs text editor (Doom daemon)
+Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
+PartOf=graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/emacs --fg-daemon
+# Emacs exits 15 on SIGTERM, systemd's default KillSignal.
+SuccessExitStatus=15
+# Doom's first start after a `doom sync` can be slow.
+TimeoutStartSec=180
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

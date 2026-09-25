@@ -197,7 +197,7 @@ binds {
     Mod+Return hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
     Mod+Space hotkey-overlay-title="Run an Application: rofi" { spawn "rofi" "-show" "drun" "-show-icons"; }
     Mod+B hotkey-overlay-title="Open the Browser: firefox" { spawn "firefox"; }
-    Mod+C hotkey-overlay-title="Open Emacs" { spawn "emacs"; }
+    Mod+C hotkey-overlay-title="Open Emacs (daemon client)" { spawn "emacsclient" "-c" "-a" ""; }
 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
