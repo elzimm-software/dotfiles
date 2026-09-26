@@ -4,7 +4,9 @@
     ### Display ###
 
     # Which monitor should the notifications be displayed on.
-    monitor = 0
+    # By name on the desktop: index 0 is whichever output wlroots enumerates
+    # first, which lands on the rightmost screen (HDMI-A-1) there.
+    monitor = {{ if eq .machine "desktop" }}DP-2{{ else }}0{{ end }}
 
     # Display notification on focused monitor.  Possible modes are:
     #   mouse: follow mouse pointer
