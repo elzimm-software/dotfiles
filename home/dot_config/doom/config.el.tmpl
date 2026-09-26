@@ -66,6 +66,37 @@
 ;; `after!' is too late and lsp-mode falls back to (downloading) pyright.
 (setq lsp-pyright-langserver-command "basedpyright")
 
+;; Run clippy instead of plain `cargo check' for rust-analyzer's on-save
+;; diagnostics, so lints show up inline alongside compile errors. Set via
+;; rustic, not lsp-rust: `rustic-lsp-mode-setup' copies this into
+;; `lsp-rust-analyzer-cargo-watch-command' on every LSP start, clobbering
+;; any direct setting of that.
+(setq rustic-lsp-check-command "clippy")
+
+;; dape's built-in gdb config only lists C/C++ modes, and runs plain gdb,
+;; which sources ~/.gdbinit and so loads gef -- fine at a terminal, but gef
+;; has no business inside a DAP session. This one uses rust-gdb (for the
+;; std pretty-printers) with -nx to skip ~/.gdbinit, builds first, and
+;; defaults to target/debug/<project dir>, i.e. the binary `cargo new' names.
+(after! dape
+  (add-to-list 'dape-configs
+               `(rust-gdb
+                 modes (rust-mode rust-ts-mode rustic-mode)
+                 ensure dape-ensure-command
+                 command-cwd dape-command-cwd
+                 command "rust-gdb"
+                 command-args ("-nx" "--interpreter=dap")
+                 compile "cargo build"
+                 :request "launch"
+                 :program ,(lambda ()
+                             (let ((root (dape-cwd)))
+                               (file-name-concat
+                                root "target" "debug"
+                                (file-name-nondirectory
+                                 (directory-file-name root)))))
+                 :args []
+                 :stopAtBeginningOfMainSubprogram nil)))
+
 ;; Match ~/.clang-format (IndentWidth/TabWidth 4, spaces not tabs) so
 ;; indentation and highlight-indent-guides line up with what clang-format
 ;; actually writes on save. `cc +tree-sitter` opens files in c-ts-mode /
@@ -181,6 +212,37 @@
 ;; it resolves the server path from this at load time, so setting it in
 ;; `after!' is too late and lsp-mode falls back to (downloading) pyright.
 (setq lsp-pyright-langserver-command "basedpyright")
+
+;; Run clippy instead of plain `cargo check' for rust-analyzer's on-save
+;; diagnostics, so lints show up inline alongside compile errors. Set via
+;; rustic, not lsp-rust: `rustic-lsp-mode-setup' copies this into
+;; `lsp-rust-analyzer-cargo-watch-command' on every LSP start, clobbering
+;; any direct setting of that.
+(setq rustic-lsp-check-command "clippy")
+
+;; dape's built-in gdb config only lists C/C++ modes, and runs plain gdb,
+;; which sources ~/.gdbinit and so loads gef -- fine at a terminal, but gef
+;; has no business inside a DAP session. This one uses rust-gdb (for the
+;; std pretty-printers) with -nx to skip ~/.gdbinit, builds first, and
+;; defaults to target/debug/<project dir>, i.e. the binary `cargo new' names.
+(after! dape
+  (add-to-list 'dape-configs
+               `(rust-gdb
+                 modes (rust-mode rust-ts-mode rustic-mode)
+                 ensure dape-ensure-command
+                 command-cwd dape-command-cwd
+                 command "rust-gdb"
+                 command-args ("-nx" "--interpreter=dap")
+                 compile "cargo build"
+                 :request "launch"
+                 :program ,(lambda ()
+                             (let ((root (dape-cwd)))
+                               (file-name-concat
+                                root "target" "debug"
+                                (file-name-nondirectory
+                                 (directory-file-name root)))))
+                 :args []
+                 :stopAtBeginningOfMainSubprogram nil)))
 
 ;; Match ~/.clang-format (IndentWidth/TabWidth 4, spaces not tabs) so
 ;; indentation and highlight-indent-guides line up with what clang-format
