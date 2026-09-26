@@ -32,10 +32,23 @@
     height = 300
 
     # Position the notification in the top right corner
+{{- if eq .machine "desktop" }}
+    # ...of DP-2, but anchored top-left with the x offset worked out by hand
+    # (1920 - width 300 - 10 margin). scroll's layer_shell open animation draws
+    # its first frame full-size at the zero-width anchor point, so a right-
+    # anchored popup flashes onto HDMI-A-1 for a frame; a left-anchored one's
+    # position doesn't depend on its width, so that frame lands in place.
+    # Keep in sync with `width` above if that changes.
+    origin = top-left
+
+    # Offset from the origin
+    offset = 1610x50
+{{- else }}
     origin = top-right
 
     # Offset from the origin
     offset = 10x50
+{{- end }}
 
     # Scale factor. It is auto-detected if value is 0.
     scale = 0
