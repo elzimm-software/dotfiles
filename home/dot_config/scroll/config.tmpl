@@ -351,8 +351,8 @@ bindsym $mod+equal       lua $scripts/cycle_size_rel.lua along  next
 bindsym $mod+Shift+minus lua $scripts/cycle_size_rel.lua across prev
 bindsym $mod+Shift+equal lua $scripts/cycle_size_rel.lua across next
 
-bindsym $mod+t toggle_size this 1.0 1.0
-bindsym $mod+Shift+t toggle_size active 1.0 1.0
+bindsym $mod+f toggle_size this 1.0 1.0
+bindsym $mod+Shift+f toggle_size active 1.0 1.0
 
 bindsym $mod+comma scale_content incr -0.05
 bindsym $mod+period scale_content incr 0.05
@@ -368,15 +368,15 @@ bindsym --no-repeat $mod+Shift+Tab scale_workspaces toggle
 
 ### Fullscreen / floating -------------------------------------------------------
 
-bindsym $mod+f fullscreen
-bindsym $mod+Ctrl+f fullscreen layout
-bindsym $mod+Alt+f fullscreen application
-bindsym $mod+Ctrl+Alt+f fullscreen global
+bindsym $mod+t fullscreen
+bindsym $mod+Ctrl+t fullscreen layout
+bindsym $mod+Alt+t fullscreen application
+bindsym $mod+Ctrl+Alt+t fullscreen global
 
 bindsym $mod+d focus mode_toggle
 bindsym $mod+y focus mode_toggle
 bindsym $mod+Shift+d floating toggle
-bindsym $mod+Shift+f floating toggle
+bindsym $mod+Shift+t floating toggle
 
 bindsym --no-repeat $mod+a pin beginning
 bindsym --no-repeat $mod+Shift+a pin end
@@ -504,7 +504,7 @@ mode "togglesizeh" {
     bindsym r toggle_size reset; mode default
     bindsym Escape mode "default"
 }
-bindsym $mod+Ctrl+t mode "togglesizeh"
+bindsym $mod+Ctrl+f mode "togglesizeh"
 
 mode "togglesizev" {
     bindsym 4 toggle_size all 1.0 0.333333; mode default
@@ -514,7 +514,7 @@ mode "togglesizev" {
     bindsym r toggle_size reset; mode default
     bindsym Escape mode "default"
 }
-bindsym $mod+Ctrl+Shift+t mode "togglesizev"
+bindsym $mod+Ctrl+Shift+f mode "togglesizev"
 
 mode "jump" {
     bindsym slash jump tiling; mode default
